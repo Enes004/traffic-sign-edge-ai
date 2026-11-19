@@ -89,3 +89,29 @@ Required: Python 3.8+ and Pillow. PyYAML is not required. The script never insta
 ```bash
 python3 -m pytest tests/test_prepare_dataset.py -q
 ```
+
+---
+
+## Model training (YOLO26n — FP32 Baseline)
+
+`src/train.py` trains `YOLO26n` in **FP32** precision on the prepared GTSDB dataset (`--split-mode official`) using deterministic settings across three random seeds (`0, 1, 2`). Best checkpoints are saved to `models/yolo26n_img640_seed{0,1,2}.pt` and training logs to `runs/train/yolo26n_img640_seed{0,1,2}/results.csv`.
+
+### Usage
+
+```bash
+python3 src/train.py --imgsz 640 --seed 0
+python3 src/train.py --imgsz 640 --seed 1
+python3 src/train.py --imgsz 640 --seed 2
+```
+
+### Training configuration
+
+| Parameter | Value | Notes |
+| :--- | :--- | :--- |
+| **Model** | `YOLO26n` (`yolo26n.pt`) | 121 layers, 2,390,221 params, 5.4 GFLOPs, 5.4 MB |
+| **Precision** | `FP32` | Baseline full-precision training |
+| **Input size (`--imgsz`)** | `640` (`640×640`) | Fixed resolution for baseline runs |
+| **Seeds (`--seed`)** | `0, 1, 2` | `deterministic=True` for reproducibility |
+| **Epochs (`--epochs`)** | `100` | Early stopping with `--patience 25` |
+| **Batch size (`--batch`)** | `16` | Default batch size |
+| **Horizontal flip (`fliplr`)** | `0
