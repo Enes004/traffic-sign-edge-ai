@@ -1412,7 +1412,7 @@ def prepare_dataset(
     ratios: Sequence[float] = (0.70, 0.15, 0.15),
     jpeg_quality: int = 95,
     include_unannotated: bool = True,
-    split_mode: str = "random",
+    split_mode: str = "official",
     force_reconvert: bool = False,
 ) -> Dict[str, object]:
     validate_class_mapping()
@@ -1733,7 +1733,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--split-mode",
         choices=("random", "official"),
-        default="random",
+        default="official",
         help=(
             "random: seeded split over all selected images. official: keep the "
             "verified official test images 00600-00899 and split the rest into "
@@ -1765,7 +1765,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ratios = (args.train_ratio, args.val_ratio, args.test_ratio)
     try:
         source_root = acquire_source(
-            REPO_ROOT / "data",
+            REPO_ROOT / "data" / "raw",
             source_arg=args.source,
             zip_arg=args.zip,
             download=args.download,
