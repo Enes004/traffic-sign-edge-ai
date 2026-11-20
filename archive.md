@@ -244,7 +244,7 @@ Hem `.pt` hem `fp32.onnx` modellerine birebir aynı kare ön-işleme (`batch=1, 
 | $\text{mAP}_{50\text{-}95}$ | 0.7555 | 0.7555 | $+0.0000$ |
 | **Durum** | — | — | **`PASS` ($\max \Delta\text{mAP} = 0.0000$)** |
 
-* **Metodolojik Sonuç:** Hem Seed 0 hem Seed 1 için ONNX dışa aktarımının **sıfır doğruluk kaybı ve sıfır sayısal sapma** ile gerçekleştiği kanıtlanmıştır. Ayrıca Raspberry Pi 5 üzerindeki final benchmark da statik $640 \times 640$, `batch=1` düzeninde çalışacağından değerlendirme hattı uçtan uca standartlaştırılmıştır.
+* **Metodolojik Sonuç:** Üç seed için `.pt` ve FP32 ONNX doğrulama metrikleri, `640 × 640` ve `batch=1` altında raporlanan dört ondalık basamağa kadar eşleşti. Raspberry Pi 5 final ölçümü de bu giriş ayarlarını kullanacak.
 
 #### Seed Bazlı ONNX Parity Özeti (`batch=1, rect=False`)
 
@@ -252,7 +252,7 @@ Hem `.pt` hem `fp32.onnx` modellerine birebir aynı kare ön-işleme (`batch=1, 
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
 | **Seed 0** | 9.40 MB | 0.9626 | 0.9626 | 0.7865 | 0.7865 | `PASS` ($\Delta = 0.0000$) |
 | **Seed 1** | 9.40 MB | 0.9015 | 0.9015 | 0.7555 | 0.7555 | `PASS` ($\Delta = 0.0000$) |
-| **Seed 2** | *Beklemede* | — | — | — | — | — |
+| **Seed 2** | 9.40 MiB | 0.9354 | 0.9354 | 0.7757 | 0.7757 | `PASS` ($\Delta = 0.0000$) |
 
 ## 7. Statik INT8 Quantization (PTQ Calibration)
 
@@ -277,7 +277,7 @@ Burada $r$ orijinal FP32 değeri, $q$ tam sayı (INT8) karşılığı, $\hat{r}$
 
 * **100 Eğitim Görüntüsüyle Kalibrasyon (`train` split, `calib_seed=42`):** Ağırlıklar sabit olduğu için aralıkları doğrudan bilinir; ancak ara katman aktivasyonları girdi görüntüsüne bağlıdır. `train` kümesinden deterministik olarak seçilen $100$ görüntü yalnızca **ileri besleme (forward pass)** ile ağdan geçirilir. `CalibrationMethod.MinMax` yöntemi her katmandaki minimum ve maksimum aktivasyon sınırlarını gözlemleyerek sabit $(S, Z)$ parametrelerini hesaplar ve ONNX grafiğine gömer. Test ve doğrulama verisi kalibrasyona hiç dahil edilmez (veri sızıntısı önlenir).
 
-* **Sadece `Conv` Katmanlarının Kuantize Edilmesi (`op_types_to_quantize=["Conv"]`):** İşlem yükünün büyük çoğunluğu evrişim (`Conv`) katmanlarındadır. YOLO'nun sonundaki kutu koordinatı çözme (box decoding) katmanları ve bias'lar FP32 bırakılarak hassas koordinat bozulması (mAP çökmesi) engellenir. Bu nedenle teorik $\%75$ yerine yaklaşık $\%69.5$ disk küçülmesi elde edilir.
+* **`Conv` İşlemlerinin Kuantize Edilmesi (`op_types_to_quantize=["Conv"]`):** Üç INT8 ONNX dosyasının her birinde `Conv` işlemlerine bağlı 102 bias `INT32` olarak saklanır. Dosyalar ayrıca dönüşüm ölçeklerini ve kuantizasyon kapsamı dışındaki işlemleri içerir. Ölçülen disk boyutu küçülmesi yaklaşık %69,5.
 
 * **QDQ (`QuantizeLinear` / `DequantizeLinear`) Düğüm Dengesi:** Ağırlıklar dosya içinde doğrudan INT8 olarak saklandığından çalışma zamanında ağırlıklar için yalnızca `DequantizeLinear` (DQ) düğümü yer alır; aktivasyonlar ise hem `QuantizeLinear` (Q) hem `DequantizeLinear` (DQ) düğümünden geçer. Bu nedenle DQ sayısı Q sayısının yaklaşık iki katıdır (`194` vs. `398`). ONNX Runtime, çıkarım sırasında `Q -> DQ -> Conv` bloklarını grafik birleştirme (graph fusion) ile tek bir donanım hızlandırmalı INT8 çekirdeğine (Raspberry Pi 5 üzerinde **ARM NEON INT8**) dönüştürür.
 
@@ -287,11 +287,11 @@ Burada $r$ orijinal FP32 değeri, $q$ tam sayı (INT8) karşılığı, $\hat{r}$
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Seed 0** | 9.40 MB | 2.87 MB | **69.5%** | 194 | 398 |
 | **Seed 1** | 9.40 MB | 2.87 MB | **69.5%** | 194 | 398 |
-| **Seed 2** | *Beklemede* | — | — | — | — |
+| **Seed 2** | 9.40 MiB | 2.87 MiB | **69.5%** | 194 | 398 |
 
 ### 7.4. Laptop CPU Doğrulama Ön-Kontrolü (`val` Split, `batch=1, rect=False`)
 
-Raspberry Pi 5'e aktarımdan önce kuantize modellerde doğruluk çökmesi olmadığını teyit etmek amacıyla FP32 ve INT8 ONNX modelleri laptop CPU'su (Intel Core i7-14650HX) üzerinde aynı `val` kümesinde (`81` görüntü, `104` levha, `640px`) karşılaştırılmıştır.
+FP32 ve INT8 ONNX modelleri Pi 5'e aktarılmadan önce aynı `val` kümesinde (81 görüntü, 104 levha, `640px`) karşılaştırıldı. Seed 0 ve 1, Intel Core i7-14650HX üzerinde ölçüldü. Seed 2, Enes'in Intel Core i5-13500H işlemcili laptopunda ölçüldü.
 
 #### Seed 0 — FP32 vs. INT8 (`val`, Laptop CPU)
 
@@ -333,9 +333,22 @@ Raspberry Pi 5'e aktarımdan önce kuantize modellerde doğruluk çökmesi olmad
 | `danger` | 20 | 25 | 0.927 | 0.920 | 0.912 | 0.752 |
 | `mandatory` | 10 | 11 | 0.818 | 0.817 | 0.829 | 0.672 |
 
+#### Seed 2 — FP32 ve INT8 doğrulaması (`val`, Intel Core i5-13500H)
+
+Enes, iki ONNX modelini `640 × 640`, `batch=1`, `rect=False` ayarlarında ve ONNX Runtime `1.23.2` CPU sağlayıcısıyla çalıştırdı. Export kontrolünde `.pt` ile FP32 ONNX metrikleri dört ondalık basamağa kadar eşleşti (`PASS`). INT8 kalibrasyonu `train` kümesinden seçilen 100 görüntüyle yapıldı.
+
+| Metrik | FP32 ONNX | INT8 ONNX | Fark (INT8 − FP32) |
+| :--- | ---: | ---: | ---: |
+| Model boyutu | 9.40 MiB | 2.87 MiB | −69.5% |
+| Precision | 0.9413 | 0.9257 | −0.0156 |
+| Recall | 0.9417 | 0.9163 | −0.0254 |
+| mAP50 | 0.9354 | 0.9317 | −0.0037 |
+| mAP50–95 | 0.7757 | 0.7685 | −0.0072 |
+| Çıkarım süresi | 30.8 ms/görüntü | 30.9 ms/görüntü | +0.1 ms/görüntü |
+
 * **Ön-Kontrol Yorumu:**
-  * **Doğruluk Korunumu:** Her iki seed'de de `mAP50` neredeyse hiç düşmemiştir (Seed 0: $-0.0035$, Seed 1: $-0.0001$). Seed 1'de `Recall` $+0.0291$ artarken `Precision` $-0.0360$ gevşemiş, sıkı IoU metriği olan `mAP50-95` ise beklenen hafif kuantizasyon yuvarlama etkisiyle Seed 0'da $-0.0128$, Seed 1'de $-0.0203$ değişmiştir.
-  * **Hız Ölçümü Notu:** Laptop x86 CPU'daki (Intel Core i7-14650HX) kısa 81 görüntülük `val` koşuları ısınma/turbo frekans dalgalanmasına açık olduğundan hız kıyaslaması için referans alınmaz; gerçek gecikme ve hızlanma ölçümleri Raspberry Pi 5 (ARM64 NEON) üzerinde warmup sonrası $227$ görüntülük `test` setinde yapılacaktır.
+  * **Doğruluk Korunumu:** `mAP50` değişimi Seed 0'da −0,0035, Seed 1'de −0,0001 ve Seed 2'de −0,0037. Daha sıkı kutu örtüşme eşiklerini de içeren `mAP50–95` değişimi sırasıyla −0,0128, −0,0203 ve −0,0072.
+  * **Hız Ölçümü Notu:** Tablolardaki süreler laptop CPU'larında yapılan `val` koşularına ait. Raspberry Pi 5 için gecikme ve hızlanma, ısınma çalıştırmalarından sonra 227 görüntülük `test` kümesinde ölçülecek.
 
 ## 8. Raspberry Pi 5 Final Test ve Performans Ölçümleri (`test` — 227 Görüntü)
 
@@ -347,8 +360,8 @@ Raspberry Pi 5'e aktarımdan önce kuantize modellerde doğruluk çökmesi olmad
 | **Seed 0** | INT8 | 2.87 | — | — | — | — | — | — |
 | **Seed 1** | FP32 | 9.40 | — | — | — | — | — | — |
 | **Seed 1** | INT8 | 2.87 | — | — | — | — | — | — |
-| **Seed 2** | FP32 | — | — | — | — | — | — | — |
-| **Seed 2** | INT8 | — | — | — | — | — | — | — |
+| **Seed 2** | FP32 | 9.40 | — | — | — | — | — | — |
+| **Seed 2** | INT8 | 2.87 | — | — | — | — | — | — |
 
 ## 9. 3-Seed Genel Karşılaştırma ve Ödünleşim Analizi (FP32 vs. INT8)
 
