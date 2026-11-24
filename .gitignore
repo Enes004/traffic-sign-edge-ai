@@ -221,3 +221,8 @@ __marimo__/
 
 #Dataset files
 data/
+
+# Redundant training weights (canonical best checkpoints live in models/) & temp val outputs
+runs/**/weights/
+runs/detect/
+

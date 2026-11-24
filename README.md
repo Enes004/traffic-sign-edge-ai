@@ -3,7 +3,7 @@ Traffic Sign Detection and INT8 Quantization on Raspberry Pi 5
 
 ## Dataset preparation (GTSDB → YOLO)
 
-`src/prepare_dataset.py` converts the official GTSDB `FullIJCNN2013` release into a YOLO detection dataset under `data/gtsdb/`. Raw files in `data/FullIJCNN2013/` are read-only inputs and are never modified.
+`src/prepare_dataset.py` converts the official GTSDB `FullIJCNN2013` release into a YOLO detection dataset under `data/gtsdb/`. Raw files in `data/raw/FullIJCNN2013/` are read-only inputs and are never modified.
 
 ### Usage
 
@@ -15,13 +15,14 @@ Explicit example:
 
 ```bash
 python3 src/prepare_dataset.py \
-  --source data/FullIJCNN2013 \
+  --source data/raw/FullIJCNN2013 \
   --output data/gtsdb \
+  --split-mode official \
   --seed 42 \
   --train-ratio 0.70 --val-ratio 0.15 --test-ratio 0.15
 ```
 
-If the raw dataset is unavailable, the script checks local ZIP archives (`data/FullIJCNN2013.zip`, `data/GTSDB_FullIJCNN2013.zip`) before printing manual instructions. Downloads are opt-in:
+If the raw dataset is unavailable, `setup.sh` or `src/prepare_dataset.py --download` fetches the official archive into `data/raw/`. The script checks local ZIP archives (`data/raw/FullIJCNN2013.zip`, `data/raw/GTSDB_FullIJCNN2013.zip`) before printing manual instructions. Downloads are opt-in:
 
 ```bash
 python3 src/prepare_dataset.py --download
@@ -62,8 +63,8 @@ Policy: if an image contains **any** annotation from the excluded `other` set, t
 
 ### Splits and reproducibility
 
-- `--split-mode random` (default): sorted image names are shuffled with `random.Random(seed)`, then divided using the configured ratios. An image appears in exactly one split.
-- `--split-mode official`: preserves the official test range `00600–00899`; the remaining images are split into train/val from the same seed. Official test membership was verified by SHA-256 checks at sampled positions (`00000→00600`, `00001→00601`, `00150→00750`, `00299→00899`) against the official `TestIJCNN2013.zip`.
+- `--split-mode official` (default): preserves the official test range `00600–00899`; the remaining images are split into train/val from the same seed. Official test membership was verified by SHA-256 checks at sampled positions (`00000→00600`, `00001→00601`, `00150→00750`, `00299→00899`) against the official `TestIJCNN2013.zip`.
+- `--split-mode random`: sorted image names are shuffled with `random.Random(seed)`, then divided using the configured ratios. An image appears in exactly one split.
 - The official competition used 600 train / 300 test. Because images with excluded-class annotations are dropped, prepared counts differ from the official 600/300.
 - GTSDB is video-derived and provides no sequence IDs, so random splitting can place near-duplicate frames in different splits. Official mode is closer to the benchmark protocol.
 - Same source, seed, split mode, ratios, and JPEG quality produce the same split and labels.
@@ -114,4 +115,76 @@ python3 src/train.py --imgsz 640 --seed 2
 | **Seeds (`--seed`)** | `0, 1, 2` | `deterministic=True` for reproducibility |
 | **Epochs (`--epochs`)** | `100` | Early stopping with `--patience 25` |
 | **Batch size (`--batch`)** | `16` | Default batch size |
-| **Horizontal flip (`fliplr`)** | `0
+| **Horizontal flip (`fliplr`)** | `0.0` | Disabled to prevent mirroring traffic sign numbers/symbols |
+| **Dataset split** | `official` | Train: 378 images · Val: 81 images (104 instances) · Test: 227 images (held out) |
+| **Hardware / Software** | NVIDIA GeForce RTX 5060 Laptop GPU | Python 3.10.12, PyTorch 2.9.1+cu128, Ultralytics 8.4.215 |
+
+### Validation results (3-seed FP32 baseline, `imgsz=640`)
+
+Evaluated on the validation split (`81` images, `104` instances: `68` prohibitory, `25` danger, `11` mandatory). The test split (`227` images) remains untouched during training, calibration, and model selection.
+
+| Seed | Best Epoch | Precision | Recall | mAP50 | mAP50-95 | Checkpoint |
+| :--- | :---: | :---: | :---: | :---: | :---: | :--- |
+| **0** | 40 / 65 | 0.9615 | 0.8678 | 0.9498 | 0.7727 | `models/yolo26n_img640_seed0.pt` |
+| **1** | 100 / 100 | 0.9171 | 0.8788 | 0.9270 | 0.7755 | `models/yolo26n_img640_seed1.pt` |
+| **2** | 51 / 76 | 0.9287 | 0.9415 | 0.9456 | 0.7818 | `models/yolo26n_img640_seed2.pt` |
+| **Mean ± Std** | — | **0.9358 ± 0.0188** | **0.8960 ± 0.0325** | **0.9408 ± 0.0099** | **0.7767 ± 0.0038** | — |
+
+---
+
+## Resolution ablation (`YOLO26n` — `320×320`, FP32 & Static INT8 PTQ)
+
+To isolate the effect of input resolution on accuracy, quantization sensitivity, and Raspberry Pi 5 CPU latency, `YOLO26n` is also fine-tuned from `yolo26n.pt` at `320×320` on the exact same `official` split (`378 / 81 / 227`) with identical hyperparameters (`epochs=100`, `patience=25`, `batch=16`, `deterministic=True`, `fliplr=0.0`, seeds `0, 1, 2`).
+
+### Training, export, quantization, and verification commands
+
+```bash
+for s in 0 1 2; do
+  python3 src/train.py --imgsz 320 --seed $s
+  python3 src/export_onnx.py --imgsz 320 --seed $s
+  python3 src/verify_onnx.py --imgsz 320 --seed $s
+  python3 src/quantize_int8.py --imgsz 320 --seed $s
+done
+
+python3 src/verify_onnx_suite.py --imgsz 320 --seeds 0 1 2 --eval-val --output results/ablation_320/summary.json
+```
+
+### Training validation results (`imgsz=320`, Ultralytics default `rect=True`)
+
+| Seed | Best Epoch | Precision | Recall | mAP50 | mAP50-95 | Checkpoint |
+| :--- | :---: | :---: | :---: | :---: | :---: | :--- |
+| **0** | 86 / 100 | 0.8836 | 0.6405 | 0.7389 | 0.5241 | `models/yolo26n_img320_seed0.pt` |
+| **1** | 83 / 100 | 0.9400 | 0.5692 | 0.6937 | 0.4917 | `models/yolo26n_img320_seed1.pt` |
+| **2** | 83 / 100 | 0.8910 | 0.6809 | 0.7710 | 0.5197 | `models/yolo26n_img320_seed2.pt` |
+| **Mean ± Std** | — | **0.9049 ± 0.0250** | **0.6302 ± 0.0462** | **0.7345 ± 0.0317** | **0.5118 ± 0.0143** | — |
+
+### Exported ONNX models and `val` pre-check (`imgsz=320`, `batch=1`, `rect=False`, CPU)
+
+- **Input / Output shapes:** `[1, 3, 320, 320]` → `[1, 7, 2100]` (`1.3 GFLOPs` vs. `5.4 GFLOPs` at `640×640`).
+- **INT8 PTQ settings:** 100 deterministic `train` calibration images (`calib_seed=42`), QDQ format, `QUInt8` activations, `QInt8` per-channel weights, `MinMax`, `op_types_to_quantize=["Conv"]` (`102` Conv nodes, `102` `INT32` biases, `194` `QuantizeLinear`, `398` `DequantizeLinear`).
+- **Model sizes:** FP32 `9.28 MiB` → INT8 `2.75 MiB` (`-70.4%`). All 6 ONNX files passed `onnx.checker`, ONNX Runtime CPU shape/smoke inference checks (`00004.jpg`), and `.pt` vs. FP32 parity (`max mAP delta = 0.0000`, `PASS`).
+
+| Seed | Format | Size | Precision | Recall | mAP50 | mAP50-95 | Model File |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| **0** | FP32 | 9.28 MiB | 0.9075 | 0.5896 | 0.6938 | 0.5035 | `models/yolo26n_img320_seed0_fp32.onnx` |
+| **0** | INT8 | 2.75 MiB | 0.8949 | 0.5725 | 0.6732 | 0.4785 | `models/yolo26n_img320_seed0_int8.onnx` |
+| **1** | FP32 | 9.28 MiB | 0.9240 | 0.5695 | 0.6962 | 0.4884 | `models/yolo26n_img320_seed1_fp32.onnx` |
+| **1** | INT8 | 2.75 MiB | 0.9314 | 0.5559 | 0.6644 | 0.4644 | `models/yolo26n_img320_seed1_int8.onnx` |
+| **2** | FP32 | 9.28 MiB | 0.8530 | 0.6838 | 0.7516 | 0.5300 | `models/yolo26n_img320_seed2_fp32.onnx` |
+| **2** | INT8 | 2.75 MiB | 0.9597 | 0.5987 | 0.7044 | 0.4773 | `models/yolo26n_img320_seed2_int8.onnx` |
+| **Mean ± Std** | **FP32** | **9.28 MiB** | **0.8949 ± 0.0304** | **0.6143 ± 0.0498** | **0.7138 ± 0.0267** | **0.5073 ± 0.0172** | — |
+| **Mean ± Std** | **INT8** | **2.75 MiB** | **0.9286 ± 0.0265** | **0.5757 ± 0.0176** | **0.6807 ± 0.0172** | **0.4734 ± 0.0064** | — |
+
+Full machine-readable verification metadata (hashes, shapes, graph counts, and validation metrics) is stored in `results/ablation_320/summary.json`, and detailed methodology/results are tracked in `archive.md`.
+
+---
+
+## Raspberry Pi 5 benchmark, object-size analysis, and tests
+
+- `src/benchmark_pi_v3.py`: Pure ONNX Runtime + NumPy + OpenCV Raspberry Pi 5 CPU latency/FPS/mAP benchmark on the held-out `test` split (`227` images).
+- `src/analyze_object_size.py`: Stratified FP32 vs. INT8 recall analysis across small/medium/large ground-truth bounding-box tertiles.
+- Full test suite:
+
+```bash
+python3 -m pytest -q
+```

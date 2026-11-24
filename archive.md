@@ -97,7 +97,7 @@ $$
 
 * **Erken Durdurma (`epochs=100`, `patience=25`):** Doğrulama başarımı 25 epoch boyunca iyileşmediğinde eğitimi durdurarak küçük veri setinde aşırı öğrenmeyi (overfitting) önler ve en yüksek doğrulama skorlu kontrol noktasını (`best.pt`) saklar.
 
-* **Çözünürlük Kapsamı ($640\text{ px}$ Sabit):** Başlangıç planında yer alan $320\text{ px}$ çözünürlük ablasyonu proje kapsamından çıkarılarak, tüm deney protokolü Raspberry Pi 5 üzerinde aynı çözünürlükte ($640 \times 640$) saf **FP32 vs. INT8** etkisini 3 seed çiftiyle ölçmeye odaklanmıştır.
+* **Çözünürlük Kapsamı ($640\text{ px}$ Ana Deney + $320\text{ px}$ Çözünürlük Ablasyonu):** Ana **FP32 vs. INT8** karşılaştırması $640 \times 640$ çözünürlükte 3 seed çiftiyle yürütülmüş; ders yönergesindeki zorunlu ablasyon şartı (Hipotez H2 / E3) kapsamında aynı `official` veri ayrımı ve birebir aynı hiperparametrelerle $320 \times 320$ çözünürlük ablasyonu (3 seed × FP32/INT8, toplam 6 ek ONNX modeli) ayrıca eğitilip doğrulanmıştır (bkz. Bölüm 8).
 
 ## 4. Mimari Geçiş Analizi: YOLO11n vs. YOLO26n
 
@@ -350,25 +350,103 @@ Enes, iki ONNX modelini `640 × 640`, `batch=1`, `rect=False` ayarlarında ve ON
   * **Doğruluk Korunumu:** `mAP50` değişimi Seed 0'da −0,0035, Seed 1'de −0,0001 ve Seed 2'de −0,0037. Daha sıkı kutu örtüşme eşiklerini de içeren `mAP50–95` değişimi sırasıyla −0,0128, −0,0203 ve −0,0072.
   * **Hız Ölçümü Notu:** Tablolardaki süreler laptop CPU'larında yapılan `val` koşularına ait. Raspberry Pi 5 için gecikme ve hızlanma, ısınma çalıştırmalarından sonra 227 görüntülük `test` kümesinde ölçülecek.
 
-## 8. Raspberry Pi 5 Final Test ve Performans Ölçümleri (`test` — 227 Görüntü)
+## 8. $320 \times 320$ Çözünürlük Ablasyonu (Eğitim, ONNX Export ve Statik INT8 PTQ)
 
-*Bu bölüm Raspberry Pi 5 üzerinde aynı `test` kümesi (`227` görüntü, `228` levha, `640px`, `batch=1`) ile FP32 ve INT8 ONNX çiftleri ölçüldükçe doldurulacaktır.*
+Giriş çözünürlüğünü $640 \times 640$'tan $320 \times 320$'ye düşürmenin tespit doğruluğu, küçük levha hassasiyeti, INT8 kuantizasyon duyarlılığı ve Raspberry Pi 5 CPU gecikmesi üzerindeki etkisini adil biçimde ölçmek için `YOLO26n` mimarisi aynı `official` GTSDB ayrımı (`378` train / `81` val / `227` held-out test) üzerinde sıfırdan fine-tune edilmiştir.
 
-| Seed | Format | Boyut (MB) | Precision | Recall | $\text{mAP}_{50}$ | $\text{mAP}_{50\text{-}95}$ | Gecikme ($\text{ms/img}$) | FPS |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Seed 0** | FP32 | 9.40 | — | — | — | — | — | — |
-| **Seed 0** | INT8 | 2.87 | — | — | — | — | — | — |
-| **Seed 1** | FP32 | 9.40 | — | — | — | — | — | — |
-| **Seed 1** | INT8 | 2.87 | — | — | — | — | — | — |
-| **Seed 2** | FP32 | 9.40 | — | — | — | — | — | — |
-| **Seed 2** | INT8 | 2.87 | — | — | — | — | — | — |
+### 8.1. Protokol Tutarlılığı ve Hesaplama Maliyeti
 
-## 9. 3-Seed Genel Karşılaştırma ve Ödünleşim Analizi (FP32 vs. INT8)
+* **Birebir Hiperparametre Eşleşmesi:** `runs/train/yolo26n_img640_seed0/args.yaml` ile `runs/train/yolo26n_img320_seed0/args.yaml` arasındaki `diff` kontrolüyle 115 parametrenin tamamında yalnızca `imgsz` (`640 -> 320`), `name` ve `save_dir` alanlarının değiştiği doğrulanmıştır (`model=yolo26n.pt`, `epochs=100`, `patience=25`, `batch=16`, `deterministic=True`, `fliplr=0.0`, `seeds={0,1,2}`, PyTorch `2.9.1+cu128`, Ultralytics `8.4.215`).
+* **Hesaplama ve Çıkış Tensörü Farkı:**
+  * **Parametre Sayısı:** $2{,}390{,}221$ (değişmedi; tam evrişimli mimari).
+  * **Hesaplama Maliyeti:** $5.4\text{ GFLOPs} \rightarrow \mathbf{1.3\text{ GFLOPs}}$ (**$4.15\times$ daha düşük işlem yükü**, $-75.9\%$).
+  * **Giriş / Çıkış Şekli:** $(1, 3, 320, 320) \rightarrow (1, 7, 2100)$ ($40^2 + 20^2 + 10^2 = 1600 + 400 + 100 = 2100$ aday hücre; $640\text{ px}$'e göre $4\times$ daha az aday).
 
-*Tüm 3 seed çiftinin Raspberry Pi 5 testleri tamamlandığında Ortalama $\pm$ Std tablosu, hızlanma çarpanı ($\text{Speedup}$), boyut sıkıştırma oranı ve küçük levha Recall farkı buraya eklenecektir.*
+### 8.2. 3-Seed Eğitim Doğrulama Özeti (`val` — 81 Görüntü, 104 Levha, Ultralytics Varsayılan `rect=True`)
 
-## 10. Depo ve Sürüm Kontrolü Kaydı
+| Seed | En İyi Epoch | Toplam Epoch | Süre (saat) | Precision | Recall | $\text{mAP}_{50}$ | $\text{mAP}_{50\text{-}95}$ | Checkpoint |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| **Seed 0** | 86 | 100 | 0.104 | 0.8836 | 0.6405 | 0.7389 | 0.5241 | `models/yolo26n_img320_seed0.pt` |
+| **Seed 1** | 83 | 100 | 0.118 | 0.9400 | 0.5692 | 0.6937 | 0.4917 | `models/yolo26n_img320_seed1.pt` |
+| **Seed 2** | 83 | 100 | 0.110 | 0.8910 | 0.6809 | 0.7710 | 0.5197 | `models/yolo26n_img320_seed2.pt` |
+| **Ortalama $\pm$ Std** | — | — | — | **$0.9049 \pm 0.0250$** | **$0.6302 \pm 0.0462$** | **$0.7345 \pm 0.0317$** | **$0.5118 \pm 0.0143$** | — |
 
-* **Git Akışı:** `feat/dataset-setup` dalı `main` ile çakışmasız birleştirilip hem yerelden hem uzak sunucudan silindi.
-* **İzlenen Varlıklar:** `.gitignore` üzerinden `data/` ve gereksiz `runs/**/weights/last.pt` dosyaları hariç tutularak tüm en iyi ağırlıklar (`models/`), taban ağırlık (`yolo26n.pt`), eğitim logları (`runs/`) ve `README.md` dokümantasyonu `main` dalına aktarıldı.
+#### Sınıf Bazlı Eğitim Doğrulama Dağılımı (`imgsz=320`, 3 Seed)
+
+| Seed | Sınıf | Görüntü | Levha | Precision | Recall | $\text{mAP}_{50}$ | $\text{mAP}_{50\text{-}95}$ |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Seed 0** | `prohibitory` | 43 | 68 | 0.859 | 0.676 | 0.778 | 0.566 |
+| **Seed 0** | `danger` | 20 | 25 | 0.791 | 0.720 | 0.797 | 0.586 |
+| **Seed 0** | `mandatory` | 10 | 11 | 1.000 | 0.525 | 0.641 | 0.421 |
+| **Seed 1** | `prohibitory` | 43 | 68 | 1.000 | 0.624 | 0.786 | 0.547 |
+| **Seed 1** | `danger` | 20 | 25 | 0.916 | 0.720 | 0.817 | 0.595 |
+| **Seed 1** | `mandatory` | 10 | 11 | 0.904 | 0.364 | 0.478 | 0.334 |
+| **Seed 2** | `prohibitory` | 43 | 68 | 0.894 | 0.676 | 0.801 | 0.552 |
+| **Seed 2** | `danger` | 20 | 25 | 0.779 | 0.840 | 0.873 | 0.632 |
+| **Seed 2** | `mandatory` | 10 | 11 | 1.000 | 0.526 | 0.639 | 0.375 |
+
+### 8.3. FP32 ONNX Export, Parity Kontrolü, Statik INT8 PTQ ve 6-Model Doğrulaması
+
+Her üç seed için `src/export_onnx.py --imgsz 320`, `src/verify_onnx.py --imgsz 320`, `src/quantize_int8.py --imgsz 320` (aynı `train` kümesinden `calib_seed=42` ile 100 kalibrasyon görüntüsü, `QDQ`, `MinMax`, `op_types_to_quantize=["Conv"]`) ve `src/verify_onnx_suite.py --imgsz 320 --eval-val` çalıştırılmıştır.
+
+* **6-Model Bütünlük & Örnek Inference Doğrulaması (`results/ablation_320/summary.json`):**
+  * Altı ONNX dosyasının tamamı (`yolo26n_img320_seed{0,1,2}_{fp32,int8}.onnx`) `onnx.checker.check_model` ve `ONNX Runtime 1.23.2` (`CPUExecutionProvider`) oturum açılışından hatasız geçti.
+  * Giriş/çıkış şekilleri 6/6 modelde `[1, 3, 320, 320] -> [1, 7, 2100]` (`tensor(float)`) olarak doğrulandı.
+  * Gerçek `val` görüntüsü (`00004.jpg`, `benchmark_pi_v3.preprocess(..., 320)`) üzerinde sonlu (`all_finite=True`) çıktı ve `benchmark_pi_v3.decode_prediction(conf=0.25)` ile tespit üretimi teyit edildi (Seed 0: `2/2`, Seed 1: `2/2`, Seed 2: `1/1`).
+  * Üç INT8 modelin her birinde `102` `Conv` (`102` `INT32` bias), `194` `QuantizeLinear`, `398` `DequantizeLinear` düğümü ve **`9.28 MiB -> 2.75 MiB` (`-70.4%`)** disk küçülmesi doğrulandı.
+
+#### Seed Bazlı ONNX Parity ve Laptop CPU `val` Ön-Kontrolü (`imgsz=320`, `batch=1, rect=False`)
+
+| Seed | Format | Boyut | Parity ($\Delta$ vs `.pt`) | Precision | Recall | $\text{mAP}_{50}$ | $\text{mAP}_{50\text{-}95}$ | $\Delta\text{mAP}_{50}$ | $\Delta\text{mAP}_{50\text{-}95}$ |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Seed 0** | FP32 ONNX | 9.28 MiB | `PASS` (0.0000) | 0.9075 | 0.5896 | 0.6938 | 0.5035 | — | — |
+| **Seed 0** | INT8 ONNX | 2.75 MiB | `Q=194, DQ=398` | 0.8949 | 0.5725 | 0.6732 | 0.4785 | $-0.0205$ | $-0.0251$ |
+| **Seed 1** | FP32 ONNX | 9.28 MiB | `PASS` (0.0000) | 0.9240 | 0.5695 | 0.6962 | 0.4884 | — | — |
+| **Seed 1** | INT8 ONNX | 2.75 MiB | `Q=194, DQ=398` | 0.9314 | 0.5559 | 0.6644 | 0.4644 | $-0.0318$ | $-0.0240$ |
+| **Seed 2** | FP32 ONNX | 9.28 MiB | `PASS` (0.0000) | 0.8530 | 0.6838 | 0.7516 | 0.5300 | — | — |
+| **Seed 2** | INT8 ONNX | 2.75 MiB | `Q=194, DQ=398` | 0.9597 | 0.5987 | 0.7044 | 0.4773 | $-0.0472$ | $-0.0526$ |
+| **Ortalama $\pm$ Std** | **FP32 ONNX** | **9.28 MiB** | **3/3 `PASS`** | **$0.8949 \pm 0.0304$** | **$0.6143 \pm 0.0498$** | **$0.7138 \pm 0.0267$** | **$0.5073 \pm 0.0172$** | — | — |
+| **Ortalama $\pm$ Std** | **INT8 ONNX** | **2.75 MiB** | **$-70.4\%$ boyut** | **$0.9286 \pm 0.0265$** | **$0.5757 \pm 0.0176$** | **$0.6807 \pm 0.0172$** | **$0.4734 \pm 0.0064$** | **$-0.0332$** | **$-0.0339$** |
+
+### 8.4. $640\text{ px}$ vs. $320\text{ px}$ Ön-Karşılaştırma (`val` Split, `batch=1, rect=False`, 3-Seed Ortalama $\pm$ Std)
+
+| Konfigürasyon | GFLOPs | Boyut | Precision | Recall | $\text{mAP}_{50}$ | $\text{mAP}_{50\text{-}95}$ | INT8 $\Delta\text{mAP}_{50}$ |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **`640px` FP32** | 5.4 | 9.40 MiB | $0.9404 \pm 0.0185$ | $0.9005 \pm 0.0361$ | $0.9332 \pm 0.0250$ | $0.7726 \pm 0.0128$ | — |
+| **`640px` INT8** | 5.4 | 2.87 MiB | $0.9182 \pm 0.0275$ | $0.9005 \pm 0.0137$ | $0.9307 \pm 0.0236$ | $0.7591 \pm 0.0171$ | $-0.0024$ |
+| **`320px` FP32** | 1.3 | 9.28 MiB | $0.8949 \pm 0.0304$ | $0.6143 \pm 0.0498$ | $0.7138 \pm 0.0267$ | $0.5073 \pm 0.0172$ | — |
+| **`320px` INT8** | 1.3 | 2.75 MiB | $0.9286 \pm 0.0265$ | $0.5757 \pm 0.0176$ | $0.6807 \pm 0.0172$ | $0.4734 \pm 0.0064$ | $-0.0332$ |
+
+* **Ön-Karşılaştırma Bulguları (H2 Doğrulaması İçin):**
+  * **Çözünürlük Düşüşünün Etkisi:** Giriş boyutunun `640 -> 320` düşürülmesi teorik hesaplama maliyetini $4.15\times$ azaltırken (`5.4 -> 1.3 GFLOPs`), FP32 `val` $\text{mAP}_{50}$ değerini $-0.2194$ ($0.9332 \rightarrow 0.7138$) ve Recall değerini $-0.2862$ ($0.9005 \rightarrow 0.6143$) düşürmüştür. Uzaktaki küçük levhaların $320 \times 320$ ölçeğinde birkaç piksele sıkışması nedeniyle özellikle az örnekli `mandatory` sınıfında belirgin duyarlılık kaybı yaşanmaktadır.
+  * **Bileşik Kuantizasyon Hassasiyeti:** $640\text{ px}$'te statik INT8 PTQ $\text{mAP}_{50}$ değerini neredeyse hiç etkilemezken ($-0.0024$), $320\text{ px}$'te aynı PTQ protokolü $\text{mAP}_{50}$ üzerinde $-0.0332$ ve $\text{mAP}_{50\text{-}95}$ üzerinde $-0.0339$ kayba yol açmıştır. Düşük çözünürlükteki zayıf özellik aktivasyonları 8-bit yuvarlama gürültüsüne karşı daha hassastır.
+  * **Kapsam Notu:** Yukarıdaki tüm ölçümler yalnızca `val` kümesine aittir; $227$ görüntülük `test` kümesi üzerindeki kesin mAP, gecikme (ms/FPS) ve 640 vs. 320 Raspberry Pi 5 benchmark karşılaştırması Enes tarafından Pi 5 üzerinde yürütülecektir.
+
+## 9. Raspberry Pi 5 Final Test ve Performans Ölçümleri (`test` — 227 Görüntü)
+
+*Bu bölüm Raspberry Pi 5 üzerinde aynı `test` kümesi (`227` görüntü, `228` levha, `640px` ve `320px`, `batch=1`) ile FP32 ve INT8 ONNX çiftleri ölçüldükçe doldurulacaktır.*
+
+| Çözünürlük | Seed | Format | Boyut (MiB) | Precision | Recall | $\text{mAP}_{50}$ | $\text{mAP}_{50\text{-}95}$ | Gecikme ($\text{ms/img}$) | FPS |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **640px** | **Seed 0** | FP32 | 9.40 | — | — | — | — | — | — |
+| **640px** | **Seed 0** | INT8 | 2.87 | — | — | — | — | — | — |
+| **640px** | **Seed 1** | FP32 | 9.40 | — | — | — | — | — | — |
+| **640px** | **Seed 1** | INT8 | 2.87 | — | — | — | — | — | — |
+| **640px** | **Seed 2** | FP32 | 9.40 | — | — | — | — | — | — |
+| **640px** | **Seed 2** | INT8 | 2.87 | — | — | — | — | — | — |
+| **320px** | **Seed 0** | FP32 | 9.28 | — | — | — | — | — | — |
+| **320px** | **Seed 0** | INT8 | 2.75 | — | — | — | — | — | — |
+| **320px** | **Seed 1** | FP32 | 9.28 | — | — | — | — | — | — |
+| **320px** | **Seed 1** | INT8 | 2.75 | — | — | — | — | — | — |
+| **320px** | **Seed 2** | FP32 | 9.28 | — | — | — | — | — | — |
+| **320px** | **Seed 2** | INT8 | 2.75 | — | — | — | — | — | — |
+
+## 10. 3-Seed Genel Karşılaştırma ve Ödünleşim Analizi (FP32 vs. INT8 & 640px vs. 320px)
+
+*Tüm 640px ve 320px seed çiftlerinin Raspberry Pi 5 testleri tamamlandığında Ortalama $\pm$ Std tablosu, hızlanma çarpanı ($\text{Speedup}$), boyut sıkıştırma oranı ve küçük levha Recall farkı buraya eklenecektir.*
+
+## 11. Depo ve Sürüm Kontrolü Kaydı
+
+* **Git Akışı:** `feat/dataset-setup` ve `feat/benchmark-results` (PR #3: `src/benchmark_pi_v3.py`, `src/analyze_object_size.py` + testler) `main` ile birleştirildi; 320px çözünürlük ablasyonu doğrudan `main` üzerinde düzenli klasör yapısıyla eklendi.
+* **İzlenen Varlıklar:** `.gitignore` üzerinden `data/`, tekrarlı `runs/**/weights/` (`best.pt` / `last.pt` kopyaları) ve geçici `runs/detect/` dizinleri hariç tutularak tüm kanonik en iyi ağırlıklar (`models/yolo26n_img{640,320}_seed{0,1,2}.pt` ve 12 `.onnx` modeli), taban ağırlık (`yolo26n.pt`), eğitim log/grafikleri (`runs/train/`), doğrulama özeti (`results/ablation_320/summary.json`), `archive.md` ve `README.md` dokümantasyonu `main` dalında tutulmaktadır.
 * **Görev Takibi:** GitHub Issues üzerinde 3 seed için ayrı ayrı görev kutucuklarını içeren ana takip issue'su oluşturuldu.

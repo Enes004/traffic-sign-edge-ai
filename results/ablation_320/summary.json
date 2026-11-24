@@ -1,0 +1,781 @@
+{
+  "metadata": {
+    "generated_at": "2026-11-24T16:19:51",
+    "imgsz": 320,
+    "expected_input_shape": [
+      1,
+      3,
+      320,
+      320
+    ],
+    "expected_output_shape": [
+      1,
+      7,
+      2100
+    ],
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "sample_val_image": "00004.jpg",
+    "test_split_touched": false,
+    "onnx_version": "1.23.2",
+    "onnxruntime_version": "1.23.2",
+    "calibration": {
+      "split": "train",
+      "calib_count": 100,
+      "calib_seed": 42,
+      "quant_format": "QDQ",
+      "calibration_method": "MinMax",
+      "op_types_to_quantize": [
+        "Conv"
+      ],
+      "activation_type": "QUInt8",
+      "weight_type": "QInt8",
+      "per_channel": true
+    }
+  },
+  "seeds": [
+    {
+      "seed": 0,
+      "pt_checkpoint": {
+        "file": "yolo26n_img320_seed0.pt",
+        "exists": true,
+        "size_bytes": 5421125,
+        "sha256": "6ce5f7e286d998bc5f2b02feffdb2105d9e78a6ee8ac80e7385cea509b81334a"
+      },
+      "fp32_onnx": {
+        "file": "yolo26n_img320_seed0_fp32.onnx",
+        "format": "fp32",
+        "size_bytes": 9728189,
+        "size_mib": 9.2775,
+        "sha256": "c06c115a374d084a9a47e6bb6e5bc79ad327e345350ef56d9f04b4a060644e36",
+        "input_name": "images",
+        "input_shape": [
+          1,
+          3,
+          320,
+          320
+        ],
+        "input_type": "tensor(float)",
+        "output_name": "output0",
+        "output_shape": [
+          1,
+          7,
+          2100
+        ],
+        "output_type": "tensor(float)",
+        "graph": {
+          "opsets": [
+            {
+              "domain": "ai.onnx",
+              "version": 17
+            }
+          ],
+          "total_nodes": 368,
+          "conv_nodes": 102,
+          "quantize_linear_nodes": 0,
+          "dequantize_linear_nodes": 0,
+          "conv_bias_types": {
+            "FLOAT": 102
+          }
+        },
+        "smoke_inference": {
+          "sample_image": "00004.jpg",
+          "all_finite": true,
+          "output_min": -2.877105712890625,
+          "output_max": 457.99407958984375,
+          "detections_conf_025": 2
+        },
+        "verified": true
+      },
+      "int8_onnx": {
+        "file": "yolo26n_img320_seed0_int8.onnx",
+        "format": "int8",
+        "size_bytes": 2882160,
+        "size_mib": 2.7486,
+        "sha256": "c6354686a3ef39bd036467a5e59fb31bf2b6c5a5e4690ffbfb78151deca59e6d",
+        "input_name": "images",
+        "input_shape": [
+          1,
+          3,
+          320,
+          320
+        ],
+        "input_type": "tensor(float)",
+        "output_name": "output0",
+        "output_shape": [
+          1,
+          7,
+          2100
+        ],
+        "output_type": "tensor(float)",
+        "graph": {
+          "opsets": [
+            {
+              "domain": "ai.onnx",
+              "version": 17
+            },
+            {
+              "domain": "ai.onnx.ml",
+              "version": 5
+            },
+            {
+              "domain": "ai.onnx.training",
+              "version": 1
+            },
+            {
+              "domain": "ai.onnx.preview.training",
+              "version": 1
+            },
+            {
+              "domain": "com.microsoft",
+              "version": 1
+            },
+            {
+              "domain": "com.microsoft.experimental",
+              "version": 1
+            },
+            {
+              "domain": "com.microsoft.nchwc",
+              "version": 1
+            },
+            {
+              "domain": "org.pytorch.aten",
+              "version": 1
+            }
+          ],
+          "total_nodes": 960,
+          "conv_nodes": 102,
+          "quantize_linear_nodes": 194,
+          "dequantize_linear_nodes": 398,
+          "conv_bias_types": {
+            "INT32": 102
+          }
+        },
+        "smoke_inference": {
+          "sample_image": "00004.jpg",
+          "all_finite": true,
+          "output_min": -4.4936065673828125,
+          "output_max": 458.021728515625,
+          "detections_conf_025": 2
+        },
+        "verified": true
+      },
+      "size_reduction_pct": 70.37,
+      "val_eval": {
+        "split": "val",
+        "batch": 1,
+        "rect": false,
+        "device": "cpu",
+        "pt": {
+          "P": 0.9075458702022835,
+          "R": 0.5895853315192569,
+          "mAP50": 0.6937647332417085,
+          "mAP50_95": 0.5035328961736193,
+          "speed_ms": {
+            "preprocess": 0.09537081483740398,
+            "inference": 20.10078020989399,
+            "loss": 0.0018710494641484806,
+            "postprocess": 0.534315209857416
+          },
+          "per_class": {
+            "prohibitory": {
+              "mAP50": 0.7795605481332568,
+              "mAP50_95": 0.5620040831534172
+            },
+            "danger": {
+              "mAP50": 0.7732234603612984,
+              "mAP50_95": 0.5733033275694094
+            },
+            "mandatory": {
+              "mAP50": 0.5285101912305704,
+              "mAP50_95": 0.3752912777980314
+            }
+          }
+        },
+        "fp32_onnx": {
+          "P": 0.9075452273860707,
+          "R": 0.58958531681402,
+          "mAP50": 0.6937647332417085,
+          "mAP50_95": 0.5035328961736193,
+          "speed_ms": {
+            "preprocess": 0.17588518514660081,
+            "inference": 15.55382460493867,
+            "loss": 0.002017123464341879,
+            "postprocess": 0.8018322839941701
+          },
+          "per_class": {
+            "prohibitory": {
+              "mAP50": 0.7795605481332568,
+              "mAP50_95": 0.5620040831534172
+            },
+            "danger": {
+              "mAP50": 0.7732234603612984,
+              "mAP50_95": 0.5733033275694094
+            },
+            "mandatory": {
+              "mAP50": 0.5285101912305704,
+              "mAP50_95": 0.3752912777980314
+            }
+          }
+        },
+        "int8_onnx": {
+          "P": 0.8949093176642426,
+          "R": 0.5724730922595422,
+          "mAP50": 0.6732234849155857,
+          "mAP50_95": 0.47845763842798433,
+          "speed_ms": {
+            "preprocess": 0.1642820370986477,
+            "inference": 14.866322222149863,
+            "loss": 0.0017421851584969526,
+            "postprocess": 0.709091580271585
+          },
+          "per_class": {
+            "prohibitory": {
+              "mAP50": 0.7393679249224261,
+              "mAP50_95": 0.523755241682258
+            },
+            "danger": {
+              "mAP50": 0.7733664609670801,
+              "mAP50_95": 0.5607809659743469
+            },
+            "mandatory": {
+              "mAP50": 0.5069360688572512,
+              "mAP50_95": 0.3508367076273481
+            }
+          }
+        },
+        "fp32_parity": {
+          "deltas": {
+            "P": -6.428162128147008e-07,
+            "R": -1.4705236806022981e-08,
+            "mAP50": 0.0,
+            "mAP50_95": 0.0
+          },
+          "max_map_delta": 0.0,
+          "status": "PASS"
+        },
+        "int8_minus_fp32": {
+          "P": -0.012635909721828043,
+          "R": -0.017112224554477806,
+          "mAP50": -0.020541248326122807,
+          "mAP50_95": -0.02507525774563496
+        }
+      }
+    },
+    {
+      "seed": 1,
+      "pt_checkpoint": {
+        "file": "yolo26n_img320_seed1.pt",
+        "exists": true,
+        "size_bytes": 5421125,
+        "sha256": "fad730c63cfa674f2a3418759a01d01924ef2e8797087a59b65086e595cdcade"
+      },
+      "fp32_onnx": {
+        "file": "yolo26n_img320_seed1_fp32.onnx",
+        "format": "fp32",
+        "size_bytes": 9728189,
+        "size_mib": 9.2775,
+        "sha256": "fb518e93f946e2c0d7b8e44c29b843381d5d1763b4107cd9970a8adac0516d4a",
+        "input_name": "images",
+        "input_shape": [
+          1,
+          3,
+          320,
+          320
+        ],
+        "input_type": "tensor(float)",
+        "output_name": "output0",
+        "output_shape": [
+          1,
+          7,
+          2100
+        ],
+        "output_type": "tensor(float)",
+        "graph": {
+          "opsets": [
+            {
+              "domain": "ai.onnx",
+              "version": 17
+            }
+          ],
+          "total_nodes": 368,
+          "conv_nodes": 102,
+          "quantize_linear_nodes": 0,
+          "dequantize_linear_nodes": 0,
+          "conv_bias_types": {
+            "FLOAT": 102
+          }
+        },
+        "smoke_inference": {
+          "sample_image": "00004.jpg",
+          "all_finite": true,
+          "output_min": 5.960464477539063e-08,
+          "output_max": 448.6727294921875,
+          "detections_conf_025": 2
+        },
+        "verified": true
+      },
+      "int8_onnx": {
+        "file": "yolo26n_img320_seed1_int8.onnx",
+        "format": "int8",
+        "size_bytes": 2882152,
+        "size_mib": 2.7486,
+        "sha256": "7da7c2225bd3a2cddfc7d9416d5895ab221727662def116b35345ac2ae2b2ccf",
+        "input_name": "images",
+        "input_shape": [
+          1,
+          3,
+          320,
+          320
+        ],
+        "input_type": "tensor(float)",
+        "output_name": "output0",
+        "output_shape": [
+          1,
+          7,
+          2100
+        ],
+        "output_type": "tensor(float)",
+        "graph": {
+          "opsets": [
+            {
+              "domain": "ai.onnx",
+              "version": 17
+            },
+            {
+              "domain": "ai.onnx.ml",
+              "version": 5
+            },
+            {
+              "domain": "ai.onnx.training",
+              "version": 1
+            },
+            {
+              "domain": "ai.onnx.preview.training",
+              "version": 1
+            },
+            {
+              "domain": "com.microsoft",
+              "version": 1
+            },
+            {
+              "domain": "com.microsoft.experimental",
+              "version": 1
+            },
+            {
+              "domain": "com.microsoft.nchwc",
+              "version": 1
+            },
+            {
+              "domain": "org.pytorch.aten",
+              "version": 1
+            }
+          ],
+          "total_nodes": 960,
+          "conv_nodes": 102,
+          "quantize_linear_nodes": 194,
+          "dequantize_linear_nodes": 398,
+          "conv_bias_types": {
+            "INT32": 102
+          }
+        },
+        "smoke_inference": {
+          "sample_image": "00004.jpg",
+          "all_finite": true,
+          "output_min": 0.0,
+          "output_max": 500.106201171875,
+          "detections_conf_025": 2
+        },
+        "verified": true
+      },
+      "size_reduction_pct": 70.37,
+      "val_eval": {
+        "split": "val",
+        "batch": 1,
+        "rect": false,
+        "device": "cpu",
+        "pt": {
+          "P": 0.9240317028101613,
+          "R": 0.5695418027027844,
+          "mAP50": 0.6961532214499971,
+          "mAP50_95": 0.4883952006215239,
+          "speed_ms": {
+            "preprocess": 0.0992913456561107,
+            "inference": 19.821827666677517,
+            "loss": 0.0019361234282971255,
+            "postprocess": 0.5273060863224983
+          },
+          "per_class": {
+            "prohibitory": {
+              "mAP50": 0.7877255033897811,
+              "mAP50_95": 0.5476588672033751
+            },
+            "danger": {
+              "mAP50": 0.8170366819686132,
+              "mAP50_95": 0.5899784153334655
+            },
+            "mandatory": {
+              "mAP50": 0.48369747899159665,
+              "mAP50_95": 0.3275483193277311
+            }
+          }
+        },
+        "fp32_onnx": {
+          "P": 0.9240316818593298,
+          "R": 0.569541901206475,
+          "mAP50": 0.6961532214499971,
+          "mAP50_95": 0.4883952006215239,
+          "speed_ms": {
+            "preprocess": 0.16188430861712946,
+            "inference": 15.217378641942942,
+            "loss": 0.0022322963357308055,
+            "postprocess": 0.6912498640169226
+          },
+          "per_class": {
+            "prohibitory": {
+              "mAP50": 0.7877255033897811,
+              "mAP50_95": 0.5476588672033751
+            },
+            "danger": {
+              "mAP50": 0.8170366819686132,
+              "mAP50_95": 0.5899784153334655
+            },
+            "mandatory": {
+              "mAP50": 0.48369747899159665,
+              "mAP50_95": 0.3275483193277311
+            }
+          }
+        },
+        "int8_onnx": {
+          "P": 0.9313513724225855,
+          "R": 0.5559180035650625,
+          "mAP50": 0.6643598698974441,
+          "mAP50_95": 0.4643527723751737,
+          "speed_ms": {
+            "preprocess": 0.17734658029911332,
+            "inference": 14.80932713580662,
+            "loss": 0.0017091358501972907,
+            "postprocess": 0.6763174814868426
+          },
+          "per_class": {
+            "prohibitory": {
+              "mAP50": 0.739138041577714,
+              "mAP50_95": 0.514679964601435
+            },
+            "danger": {
+              "mAP50": 0.8073948109502141,
+              "mAP50_95": 0.5584909729695944
+            },
+            "mandatory": {
+              "mAP50": 0.4465467571644043,
+              "mAP50_95": 0.3198873795544919
+            }
+          }
+        },
+        "fp32_parity": {
+          "deltas": {
+            "P": -2.0950831514099377e-08,
+            "R": 9.850369053765462e-08,
+            "mAP50": 0.0,
+            "mAP50_95": 0.0
+          },
+          "max_map_delta": 0.0,
+          "status": "PASS"
+        },
+        "int8_minus_fp32": {
+          "P": 0.007319690563255654,
+          "R": -0.013623897641412475,
+          "mAP50": -0.03179335155255303,
+          "mAP50_95": -0.024042428246350223
+        }
+      }
+    },
+    {
+      "seed": 2,
+      "pt_checkpoint": {
+        "file": "yolo26n_img320_seed2.pt",
+        "exists": true,
+        "size_bytes": 5421125,
+        "sha256": "476db568d60bfc4f7ec9d2e2b979787d1b4e30cdfded380683e0940082da81b2"
+      },
+      "fp32_onnx": {
+        "file": "yolo26n_img320_seed2_fp32.onnx",
+        "format": "fp32",
+        "size_bytes": 9728189,
+        "size_mib": 9.2775,
+        "sha256": "679cd274ac78ada5965f34b7ba60a92e223f349ffb6123d24df42881ceae79e8",
+        "input_name": "images",
+        "input_shape": [
+          1,
+          3,
+          320,
+          320
+        ],
+        "input_type": "tensor(float)",
+        "output_name": "output0",
+        "output_shape": [
+          1,
+          7,
+          2100
+        ],
+        "output_type": "tensor(float)",
+        "graph": {
+          "opsets": [
+            {
+              "domain": "ai.onnx",
+              "version": 17
+            }
+          ],
+          "total_nodes": 368,
+          "conv_nodes": 102,
+          "quantize_linear_nodes": 0,
+          "dequantize_linear_nodes": 0,
+          "conv_bias_types": {
+            "FLOAT": 102
+          }
+        },
+        "smoke_inference": {
+          "sample_image": "00004.jpg",
+          "all_finite": true,
+          "output_min": 5.960464477539063e-08,
+          "output_max": 524.790283203125,
+          "detections_conf_025": 1
+        },
+        "verified": true
+      },
+      "int8_onnx": {
+        "file": "yolo26n_img320_seed2_int8.onnx",
+        "format": "int8",
+        "size_bytes": 2882153,
+        "size_mib": 2.7486,
+        "sha256": "76aa165b7d64df57a5292473f2c936bc1715613ca33c25c860856f736f3ec4b5",
+        "input_name": "images",
+        "input_shape": [
+          1,
+          3,
+          320,
+          320
+        ],
+        "input_type": "tensor(float)",
+        "output_name": "output0",
+        "output_shape": [
+          1,
+          7,
+          2100
+        ],
+        "output_type": "tensor(float)",
+        "graph": {
+          "opsets": [
+            {
+              "domain": "ai.onnx",
+              "version": 17
+            },
+            {
+              "domain": "ai.onnx.ml",
+              "version": 5
+            },
+            {
+              "domain": "ai.onnx.training",
+              "version": 1
+            },
+            {
+              "domain": "ai.onnx.preview.training",
+              "version": 1
+            },
+            {
+              "domain": "com.microsoft",
+              "version": 1
+            },
+            {
+              "domain": "com.microsoft.experimental",
+              "version": 1
+            },
+            {
+              "domain": "com.microsoft.nchwc",
+              "version": 1
+            },
+            {
+              "domain": "org.pytorch.aten",
+              "version": 1
+            }
+          ],
+          "total_nodes": 960,
+          "conv_nodes": 102,
+          "quantize_linear_nodes": 194,
+          "dequantize_linear_nodes": 398,
+          "conv_bias_types": {
+            "INT32": 102
+          }
+        },
+        "smoke_inference": {
+          "sample_image": "00004.jpg",
+          "all_finite": true,
+          "output_min": 8.940696716308594e-08,
+          "output_max": 492.37835693359375,
+          "detections_conf_025": 1
+        },
+        "verified": true
+      },
+      "size_reduction_pct": 70.37,
+      "val_eval": {
+        "split": "val",
+        "batch": 1,
+        "rect": false,
+        "device": "cpu",
+        "pt": {
+          "P": 0.852990964081401,
+          "R": 0.6837642016424109,
+          "mAP50": 0.7515776249438871,
+          "mAP50_95": 0.5299763677198689,
+          "speed_ms": {
+            "preprocess": 0.09674958013936613,
+            "inference": 19.981992234489205,
+            "loss": 0.0018096050126463704,
+            "postprocess": 0.5263799260398101
+          },
+          "per_class": {
+            "prohibitory": {
+              "mAP50": 0.7694942291408271,
+              "mAP50_95": 0.5507476551636784
+            },
+            "danger": {
+              "mAP50": 0.8614886456908344,
+              "mAP50_95": 0.6161064479959285
+            },
+            "mandatory": {
+              "mAP50": 0.62375,
+              "mAP50_95": 0.42307500000000003
+            }
+          }
+        },
+        "fp32_onnx": {
+          "P": 0.8529910898752281,
+          "R": 0.683764239963581,
+          "mAP50": 0.7515776249438871,
+          "mAP50_95": 0.5299763677198689,
+          "speed_ms": {
+            "preprocess": 0.16897354308403684,
+            "inference": 14.921576160495421,
+            "loss": 0.00221704936444035,
+            "postprocess": 0.6943804198305804
+          },
+          "per_class": {
+            "prohibitory": {
+              "mAP50": 0.7694942291408271,
+              "mAP50_95": 0.5507476551636784
+            },
+            "danger": {
+              "mAP50": 0.8614886456908344,
+              "mAP50_95": 0.6161064479959285
+            },
+            "mandatory": {
+              "mAP50": 0.62375,
+              "mAP50_95": 0.42307500000000003
+            }
+          }
+        },
+        "int8_onnx": {
+          "P": 0.9596534762517074,
+          "R": 0.5987018591641312,
+          "mAP50": 0.70436831027925,
+          "mAP50_95": 0.47733236883934343,
+          "speed_ms": {
+            "preprocess": 0.17880366673731865,
+            "inference": 16.426432925948543,
+            "loss": 0.0018572222477724822,
+            "postprocess": 0.8444362223217692
+          },
+          "per_class": {
+            "prohibitory": {
+              "mAP50": 0.7369515368376629,
+              "mAP50_95": 0.5202949761307033
+            },
+            "danger": {
+              "mAP50": 0.8161533940000871,
+              "mAP50_95": 0.5449521303873269
+            },
+            "mandatory": {
+              "mAP50": 0.56,
+              "mAP50_95": 0.36675
+            }
+          }
+        },
+        "fp32_parity": {
+          "deltas": {
+            "P": 1.2579382713262532e-07,
+            "R": 3.83211701260322e-08,
+            "mAP50": 0.0,
+            "mAP50_95": 0.0
+          },
+          "max_map_delta": 0.0,
+          "status": "PASS"
+        },
+        "int8_minus_fp32": {
+          "P": 0.10666238637647929,
+          "R": -0.08506238079944983,
+          "mAP50": -0.04720931466463718,
+          "mAP50_95": -0.052643998880525456
+        }
+      }
+    }
+  ],
+  "val_summary_mean_std": {
+    "pt": {
+      "P": {
+        "mean": 0.894856179031282,
+        "std": 0.030358610379852644
+      },
+      "R": {
+        "mean": 0.6142971119548174,
+        "std": 0.04979754461217481
+      },
+      "mAP50": {
+        "mean": 0.7138318598785309,
+        "std": 0.02670809245974064
+      },
+      "mAP50_95": {
+        "mean": 0.5073014881716706,
+        "std": 0.017183326774346395
+      }
+    },
+    "fp32_onnx": {
+      "P": {
+        "mean": 0.8948559997068761,
+        "std": 0.030358456281391423
+      },
+      "R": {
+        "mean": 0.6142971526613586,
+        "std": 0.049797535353971974
+      },
+      "mAP50": {
+        "mean": 0.7138318598785309,
+        "std": 0.02670809245974064
+      },
+      "mAP50_95": {
+        "mean": 0.5073014881716706,
+        "std": 0.017183326774346395
+      }
+    },
+    "int8_onnx": {
+      "P": {
+        "mean": 0.9286380554461785,
+        "std": 0.026501233739337993
+      },
+      "R": {
+        "mean": 0.575697651662912,
+        "std": 0.017614632411528133
+      },
+      "mAP50": {
+        "mean": 0.68065055503076,
+        "std": 0.017156919951201687
+      },
+      "mAP50_95": {
+        "mean": 0.47338092654750047,
+        "std": 0.0064003767457474076
+      }
+    }
+  }
+}
