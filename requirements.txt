@@ -1,0 +1,11 @@
+numpy>=2.0,<2.3
+opencv-python>=4.12,<5
+onnxruntime==1.23.2
+psutil>=5.9
+Pillow>=10
+matplotlib>=3.8
+pandas>=2.2,<3
+notebook>=7,<8
+nbconvert>=7,<8
+ipykernel>=6,<8
+pytest>=6.2,<9

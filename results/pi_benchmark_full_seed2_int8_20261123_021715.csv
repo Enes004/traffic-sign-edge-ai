@@ -1,0 +1,2 @@
+seed,format,model_bytes,images,repeats,mAP50,mAP50_95,inference_mean_ms,inference_median_ms,inference_p95_ms,inference_fps,preprocess_mean_ms,postprocess_mean_ms,pipeline_mean_ms_no_decode,pipeline_fps_no_decode,temp_start_c,temp_end_c
+2,int8,3008219,227,5,0.9540775144787755,0.7836533265923323,128.98715154977972,128.988344,129.4602153,7.7527101574459705,6.305950216740088,0.6900533348017621,135.9831551013216,7.3538520212661345,67.2,65.0

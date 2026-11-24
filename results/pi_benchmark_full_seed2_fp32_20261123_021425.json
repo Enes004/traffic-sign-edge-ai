@@ -1,0 +1,64 @@
+{
+  "metadata": {
+    "run_at": "20261123_021425",
+    "test_images": 227,
+    "warmup": 5,
+    "repeats": 5,
+    "threads": 4,
+    "selected_seed": 2,
+    "selected_variant": "fp32",
+    "confidence_threshold": 0.001,
+    "max_det": 300,
+    "host": "Raspberry Pi 5 (expected, verify externally)",
+    "onnxruntime_version": "1.23.2",
+    "numpy_version": "2.2.6",
+    "opencv_version": "4.12.0",
+    "cpu_count": 4,
+    "ram_total_bytes": 8453963776,
+    "important": "Accuracy uses an independently implemented COCO-style AP and Ultralytics-compatible matching/NMS. Exact parity is not claimed; pipeline FPS excludes JPEG disk decode",
+    "matching": "confidence-first greedy per-IoU matching; compatible with Ultralytics 8.4.215 default validator",
+    "nms_multilabel": true,
+    "ap_interpolation": "COCO 101-point mean precision with precision envelope; no trapezoid sentinel"
+  },
+  "results": [
+    {
+      "model": "yolo26n_img640_seed2_fp32.onnx",
+      "nms_iou": 0.7,
+      "model_bytes": 9854323,
+      "images": 227,
+      "repeats": 5,
+      "inference_mean_ms": 122.08482018678414,
+      "inference_median_ms": 122.083737,
+      "inference_p95_ms": 122.6994759,
+      "preprocess_mean_ms": 5.614160844052863,
+      "postprocess_mean_ms": 0.5793635859030837,
+      "pipeline_mean_ms_no_decode": 128.2783446167401,
+      "inference_fps": 8.19102652131564,
+      "pipeline_fps_no_decode": 7.795548055969392,
+      "temp_start_c": 68.3,
+      "temp_end_c": 68.85,
+      "mAP50": 0.9520522316153174,
+      "mAP50_95": 0.7956320001688171,
+      "gt_boxes": 228,
+      "per_class": {
+        "prohibitory": {
+          "gt_boxes": 143,
+          "mAP50": 0.9923758554981821,
+          "mAP50_95": 0.8353232121323512
+        },
+        "danger": {
+          "gt_boxes": 61,
+          "mAP50": 0.9638459478994417,
+          "mAP50_95": 0.8161433875303281
+        },
+        "mandatory": {
+          "gt_boxes": 24,
+          "mAP50": 0.8999348914483285,
+          "mAP50_95": 0.7354294008437723
+        }
+      },
+      "seed": 2,
+      "format": "fp32"
+    }
+  ]
+}

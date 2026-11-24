@@ -1,0 +1,64 @@
+{
+  "metadata": {
+    "run_at": "20261123_020045",
+    "test_images": 227,
+    "warmup": 5,
+    "repeats": 5,
+    "threads": 4,
+    "selected_seed": 0,
+    "selected_variant": "fp32",
+    "confidence_threshold": 0.001,
+    "max_det": 300,
+    "host": "Raspberry Pi 5 (expected, verify externally)",
+    "onnxruntime_version": "1.23.2",
+    "numpy_version": "2.2.6",
+    "opencv_version": "4.12.0",
+    "cpu_count": 4,
+    "ram_total_bytes": 8453963776,
+    "important": "Accuracy uses an independently implemented COCO-style AP and Ultralytics-compatible matching/NMS. Exact parity is not claimed; pipeline FPS excludes JPEG disk decode",
+    "matching": "confidence-first greedy per-IoU matching; compatible with Ultralytics 8.4.215 default validator",
+    "nms_multilabel": true,
+    "ap_interpolation": "COCO 101-point mean precision with precision envelope; no trapezoid sentinel"
+  },
+  "results": [
+    {
+      "model": "yolo26n_img640_seed0_fp32.onnx",
+      "nms_iou": 0.7,
+      "model_bytes": 9854323,
+      "images": 227,
+      "repeats": 5,
+      "inference_mean_ms": 121.9003164969163,
+      "inference_median_ms": 121.887699,
+      "inference_p95_ms": 122.593143,
+      "preprocess_mean_ms": 5.601769890748899,
+      "postprocess_mean_ms": 0.747057154185022,
+      "pipeline_mean_ms_no_decode": 128.24914354185023,
+      "inference_fps": 8.203424148002904,
+      "pipeline_fps_no_decode": 7.797323025971555,
+      "temp_start_c": 67.2,
+      "temp_end_c": 68.3,
+      "mAP50": 0.9543113814503771,
+      "mAP50_95": 0.7723351925775033,
+      "gt_boxes": 228,
+      "per_class": {
+        "prohibitory": {
+          "gt_boxes": 143,
+          "mAP50": 0.9929674105113426,
+          "mAP50_95": 0.8394955629944182
+        },
+        "danger": {
+          "gt_boxes": 61,
+          "mAP50": 0.975423668162479,
+          "mAP50_95": 0.7879910664046723
+        },
+        "mandatory": {
+          "gt_boxes": 24,
+          "mAP50": 0.8945430656773092,
+          "mAP50_95": 0.6895189483334191
+        }
+      },
+      "seed": 0,
+      "format": "fp32"
+    }
+  ]
+}

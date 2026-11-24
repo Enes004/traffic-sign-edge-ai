@@ -1,5 +1,23 @@
-# traffic-sign-edge-ai
-Traffic Sign Detection and INT8 Quantization on Raspberry Pi 5
+# YOLO26n Traffic Sign Detection and Edge Deployment
+
+BİL458 Computer Vision research project. The main experiment compares FP32 and static INT8 ONNX on a Raspberry Pi 5 at 640 px. A separately trained 320 px configuration measures the resolution trade-off. The held-out GTSDB split has 227 images and three target classes.
+
+[Final experiment summary](docs/final_experiment_summary.md) · [Notebook](notebooks/traffic_sign_edge_ai.ipynb) · [Local CPU demo](results/demo/yolo26n_img640_seed0_fp32.mp4) · [Experiment history](archive.md)
+
+## Installation
+
+From the repository root, use Python 3.10+ in an isolated environment.
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+```
+
+FFmpeg with the `libx264` encoder is required to render the MP4. On Debian/Ubuntu, install the `ffmpeg` system package. Training, export and quantization additionally use `ultralytics==8.4.215`, `onnx==1.23.2` and `onnxslim==0.1.99`. Install a CUDA-enabled PyTorch build for training on an NVIDIA GPU. The original training environment used PyTorch 2.9.1+cu128.
+
+For Pi runtime only, install `numpy==2.2.6 opencv-python-headless==4.12.0.88 onnxruntime==1.23.2 psutil` with pip in a separate environment. Use a 64-bit Pi OS and the matching Python wheels. Dataset preparation uses Pillow. The saved Pi results can be summarized on a workstation.
+
 
 ## Dataset preparation (GTSDB → YOLO)
 
@@ -179,12 +197,72 @@ Full machine-readable verification metadata (hashes, shapes, graph counts, and v
 
 ---
 
-## Raspberry Pi 5 benchmark, object-size analysis, and tests
+## Final experiment and local reproduction
 
-- `src/benchmark_pi_v3.py`: Pure ONNX Runtime + NumPy + OpenCV Raspberry Pi 5 CPU latency/FPS/mAP benchmark on the held-out `test` split (`227` images).
-- `src/analyze_object_size.py`: Stratified FP32 vs. INT8 recall analysis across small/medium/large ground-truth bounding-box tertiles.
-- Full test suite:
+`models/` contains the six trained checkpoints and 12 ONNX files. `runs/train/` contains training configuration and validation histories. `data/` is prepared locally. `results/final/` contains the ABBA summaries and camera-ready plots. `results/failure_analysis/` contains four real test cases with the underlying detections and matches. Previous benchmark files and the experiment history are retained.
+
+### Rebuild the analysis from saved artifacts
+
+After preparing the dataset with the official split (seed 42), run these commands from the repository root. The first command writes a separate verification copy of the final results. Failure analysis uses seed 0 for all four models. The demo makes ten ONNX predictions on the local CPU and shows each still for three seconds.
 
 ```bash
-python3 -m pytest -q
+python src/summarize_benchmark.py --final-dir results/reproduction/final
+python src/failure_analysis.py
+python src/demo_inference.py
+python -m pytest -q
+python -m notebook notebooks/traffic_sign_edge_ai.ipynb
+```
+
+Use **Restart Kernel and Run All Cells** to regenerate the notebook tables and plots from saved files. For headless execution, run the following after creating `results/reproduction/`.
+
+```bash
+python -m nbconvert --to notebook --execute --output-dir results/reproduction notebooks/traffic_sign_edge_ai.ipynb
+```
+
+The two source logs are `results/abba_3seed_20261123_014946.log` (640 px) and `results/abba_320_20261124_223345.log` (320 px). Their `Saved:` lines define which raw CSV/JSON pairs enter the final analysis. Files from older runs and smoke tests remain outside that inventory. The raw CSV/JSON files hold run-level summaries. Individual inference timings are not included in those files.
+
+### Recreate model artifacts in a separate checkout
+
+The published experiment uses the included artifacts. Execute the following only in a separate checkout if recreating the training/export pipeline, since export and quantization write the canonical model filenames. Calibration uses 100 training images selected with seed 42.
+
+```bash
+python -m pip install ultralytics==8.4.215 onnx==1.23.2 onnxslim==0.1.99
+for size in 640 320; do
+  for seed in 0 1 2; do
+    python src/train.py --imgsz "$size" --seed "$seed" --epochs 100 --batch 16 --patience 25 --device 0
+    python src/export_onnx.py --imgsz "$size" --seed "$seed" --opset 17
+    python src/quantize_int8.py --imgsz "$size" --seed "$seed" --calib-count 100 --calib-seed 42
+  done
+done
+```
+
+### Collect a new Pi campaign
+
+Run on the Pi with the published model files and prepared test split. For the original protocol, set and record the `performance` CPU governor and record `vcgencmd measure_clock arm`, `measure_temp` and `get_throttled` before and after each run. Keep each campaign in a separate root containing `models/` and `data/gtsdb/`, as `--root` also sets the destination for raw results.
+
+```bash
+# Set CAMPAIGN_ROOT to the separate Pi campaign directory.
+for size in 640 320; do
+  for seed in 0 1 2; do
+    for variant in fp32 int8 int8 fp32; do
+      vcgencmd measure_clock arm
+      vcgencmd measure_temp
+      vcgencmd get_throttled
+      python src/benchmark_pi_v3.py --root "$CAMPAIGN_ROOT" --imgsz "$size" \
+        --seed "$seed" --variant "$variant" --threads 4 --warmup 5 --repeats 5 \
+        --conf 0.001 --nms-iou 0.7 --max-det 300
+      vcgencmd measure_clock arm
+      vcgencmd measure_temp
+      vcgencmd get_throttled
+    done
+  done
+done 2>&1 | tee "$CAMPAIGN_ROOT/abba_reproduction.log"
+```
+
+For a smoke run add `--max-images 5` to a single benchmark invocation. The existing summarizer validates the two dated published campaigns. See the final summary for how their metrics were aggregated. To rerun just the 640 px object-size analysis, use:
+
+```bash
+python src/analyze_object_size.py --seeds 0 1 2 --threads 4 --warmup 1 \
+  --conf 0.25 --match-iou 0.5 --nms-iou 0.7 --max-det 300 \
+  --output-dir results/reproduction/object_size
 ```

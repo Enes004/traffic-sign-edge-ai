@@ -1,0 +1,446 @@
+performance
+===== 320px | SEED 0 | fp32 =====
+frequency(0)=2400033792
+temp=43.9'C
+throttled=0x0
+[0;93m2026-11-24 22:33:49.264536137 [W:onnxruntime:Default, device_discovery.cc:164 DiscoverDevicesForPlatform] GPU device discovery failed: device_discovery.cc:89 ReadFileContents Failed to open file: "/sys/class/drm/card1/device/vendor"[m
+Raspberry Pi benchmark; imgsz=320 images=227 threads=4 repeat=5 warmup=5
+NOTE: multi-label class-aware NMS, confidence-first matching, COCO 101-point AP; exact Ultralytics parity is not claimed
+
+START seed=0 fp32 imgsz=320
+  Model: yolo26n_img320_seed0_fp32.onnx; imgsz=320; input=[1, 3, 320, 320]; output=[1, 7, 2100]
+    repeat 1/5: 50/227 images
+    repeat 1/5: 100/227 images
+    repeat 1/5: 150/227 images
+    repeat 1/5: 200/227 images
+    repeat 2/5: 50/227 images
+    repeat 2/5: 100/227 images
+    repeat 2/5: 150/227 images
+    repeat 2/5: 200/227 images
+    repeat 3/5: 50/227 images
+    repeat 3/5: 100/227 images
+    repeat 3/5: 150/227 images
+    repeat 3/5: 200/227 images
+    repeat 4/5: 50/227 images
+    repeat 4/5: 100/227 images
+    repeat 4/5: 150/227 images
+    repeat 4/5: 200/227 images
+    repeat 5/5: 50/227 images
+    repeat 5/5: 100/227 images
+    repeat 5/5: 150/227 images
+    repeat 5/5: 200/227 images
+  mAP50=0.7550 mAP50-95=0.4971 inference=27.71ms FPS=36.08 temp=59.5
+
+Saved: /home/bufo/traffic-sign-edge-ai/results/pi_benchmark_full_seed0_fp32_img320_20261124_223438.json
+Saved: /home/bufo/traffic-sign-edge-ai/results/pi_benchmark_full_seed0_fp32_img320_20261124_223438.csv
+frequency(0)=2400023808
+temp=58.7'C
+throttled=0x0
+===== 320px | SEED 0 | int8 =====
+frequency(0)=2400027136
+temp=59.3'C
+throttled=0x0
+[0;93m2026-11-24 22:34:39.025428429 [W:onnxruntime:Default, device_discovery.cc:164 DiscoverDevicesForPlatform] GPU device discovery failed: device_discovery.cc:89 ReadFileContents Failed to open file: "/sys/class/drm/card1/device/vendor"[m
+Raspberry Pi benchmark; imgsz=320 images=227 threads=4 repeat=5 warmup=5
+NOTE: multi-label class-aware NMS, confidence-first matching, COCO 101-point AP; exact Ultralytics parity is not claimed
+
+START seed=0 int8 imgsz=320
+  Model: yolo26n_img320_seed0_int8.onnx; imgsz=320; input=[1, 3, 320, 320]; output=[1, 7, 2100]
+    repeat 1/5: 50/227 images
+    repeat 1/5: 100/227 images
+    repeat 1/5: 150/227 images
+    repeat 1/5: 200/227 images
+    repeat 2/5: 50/227 images
+    repeat 2/5: 100/227 images
+    repeat 2/5: 150/227 images
+    repeat 2/5: 200/227 images
+    repeat 3/5: 50/227 images
+    repeat 3/5: 100/227 images
+    repeat 3/5: 150/227 images
+    repeat 3/5: 200/227 images
+    repeat 4/5: 50/227 images
+    repeat 4/5: 100/227 images
+    repeat 4/5: 150/227 images
+    repeat 4/5: 200/227 images
+    repeat 5/5: 50/227 images
+    repeat 5/5: 100/227 images
+    repeat 5/5: 150/227 images
+    repeat 5/5: 200/227 images
+  mAP50=0.7349 mAP50-95=0.4697 inference=29.56ms FPS=33.83 temp=60.05
+
+Saved: /home/bufo/traffic-sign-edge-ai/results/pi_benchmark_full_seed0_int8_img320_20261124_223530.json
+Saved: /home/bufo/traffic-sign-edge-ai/results/pi_benchmark_full_seed0_int8_img320_20261124_223530.csv
+frequency(0)=2400033792
+temp=60.4'C
+throttled=0x0
+===== 320px | SEED 0 | int8 =====
+frequency(0)=2400027136
+temp=60.4'C
+throttled=0x0
+[0;93m2026-11-24 22:35:31.021859765 [W:onnxruntime:Default, device_discovery.cc:164 DiscoverDevicesForPlatform] GPU device discovery failed: device_discovery.cc:89 ReadFileContents Failed to open file: "/sys/class/drm/card1/device/vendor"[m
+Raspberry Pi benchmark; imgsz=320 images=227 threads=4 repeat=5 warmup=5
+NOTE: multi-label class-aware NMS, confidence-first matching, COCO 101-point AP; exact Ultralytics parity is not claimed
+
+START seed=0 int8 imgsz=320
+  Model: yolo26n_img320_seed0_int8.onnx; imgsz=320; input=[1, 3, 320, 320]; output=[1, 7, 2100]
+    repeat 1/5: 50/227 images
+    repeat 1/5: 100/227 images
+    repeat 1/5: 150/227 images
+    repeat 1/5: 200/227 images
+    repeat 2/5: 50/227 images
+    repeat 2/5: 100/227 images
+    repeat 2/5: 150/227 images
+    repeat 2/5: 200/227 images
+    repeat 3/5: 50/227 images
+    repeat 3/5: 100/227 images
+    repeat 3/5: 150/227 images
+    repeat 3/5: 200/227 images
+    repeat 4/5: 50/227 images
+    repeat 4/5: 100/227 images
+    repeat 4/5: 150/227 images
+    repeat 4/5: 200/227 images
+    repeat 5/5: 50/227 images
+    repeat 5/5: 100/227 images
+    repeat 5/5: 150/227 images
+    repeat 5/5: 200/227 images
+  mAP50=0.7349 mAP50-95=0.4697 inference=29.64ms FPS=33.74 temp=62.8
+
+Saved: /home/bufo/traffic-sign-edge-ai/results/pi_benchmark_full_seed0_int8_img320_20261124_223622.json
+Saved: /home/bufo/traffic-sign-edge-ai/results/pi_benchmark_full_seed0_int8_img320_20261124_223622.csv
+frequency(0)=2400030464
+temp=62.0'C
+throttled=0x0
+===== 320px | SEED 0 | fp32 =====
+frequency(0)=2400027136
+temp=61.5'C
+throttled=0x0
+[0;93m2026-11-24 22:36:23.115045155 [W:onnxruntime:Default, device_discovery.cc:164 DiscoverDevicesForPlatform] GPU device discovery failed: device_discovery.cc:89 ReadFileContents Failed to open file: "/sys/class/drm/card1/device/vendor"[m
+Raspberry Pi benchmark; imgsz=320 images=227 threads=4 repeat=5 warmup=5
+NOTE: multi-label class-aware NMS, confidence-first matching, COCO 101-point AP; exact Ultralytics parity is not claimed
+
+START seed=0 fp32 imgsz=320
+  Model: yolo26n_img320_seed0_fp32.onnx; imgsz=320; input=[1, 3, 320, 320]; output=[1, 7, 2100]
+    repeat 1/5: 50/227 images
+    repeat 1/5: 100/227 images
+    repeat 1/5: 150/227 images
+    repeat 1/5: 200/227 images
+    repeat 2/5: 50/227 images
+    repeat 2/5: 100/227 images
+    repeat 2/5: 150/227 images
+    repeat 2/5: 200/227 images
+    repeat 3/5: 50/227 images
+    repeat 3/5: 100/227 images
+    repeat 3/5: 150/227 images
+    repeat 3/5: 200/227 images
+    repeat 4/5: 50/227 images
+    repeat 4/5: 100/227 images
+    repeat 4/5: 150/227 images
+    repeat 4/5: 200/227 images
+    repeat 5/5: 50/227 images
+    repeat 5/5: 100/227 images
+    repeat 5/5: 150/227 images
+    repeat 5/5: 200/227 images
+  mAP50=0.7550 mAP50-95=0.4971 inference=27.45ms FPS=36.43 temp=65.55
+
+Saved: /home/bufo/traffic-sign-edge-ai/results/pi_benchmark_full_seed0_fp32_img320_20261124_223711.json
+Saved: /home/bufo/traffic-sign-edge-ai/results/pi_benchmark_full_seed0_fp32_img320_20261124_223711.csv
+frequency(0)=2400030464
+temp=65.3'C
+throttled=0x0
+===== 320px | SEED 1 | fp32 =====
+frequency(0)=2400033792
+temp=64.8'C
+throttled=0x0
+[0;93m2026-11-24 22:37:11.986697171 [W:onnxruntime:Default, device_discovery.cc:164 DiscoverDevicesForPlatform] GPU device discovery failed: device_discovery.cc:89 ReadFileContents Failed to open file: "/sys/class/drm/card1/device/vendor"[m
+Raspberry Pi benchmark; imgsz=320 images=227 threads=4 repeat=5 warmup=5
+NOTE: multi-label class-aware NMS, confidence-first matching, COCO 101-point AP; exact Ultralytics parity is not claimed
+
+START seed=1 fp32 imgsz=320
+  Model: yolo26n_img320_seed1_fp32.onnx; imgsz=320; input=[1, 3, 320, 320]; output=[1, 7, 2100]
+    repeat 1/5: 50/227 images
+    repeat 1/5: 100/227 images
+    repeat 1/5: 150/227 images
+    repeat 1/5: 200/227 images
+    repeat 2/5: 50/227 images
+    repeat 2/5: 100/227 images
+    repeat 2/5: 150/227 images
+    repeat 2/5: 200/227 images
+    repeat 3/5: 50/227 images
+    repeat 3/5: 100/227 images
+    repeat 3/5: 150/227 images
+    repeat 3/5: 200/227 images
+    repeat 4/5: 50/227 images
+    repeat 4/5: 100/227 images
+    repeat 4/5: 150/227 images
+    repeat 4/5: 200/227 images
+    repeat 5/5: 50/227 images
+    repeat 5/5: 100/227 images
+    repeat 5/5: 150/227 images
+    repeat 5/5: 200/227 images
+  mAP50=0.7472 mAP50-95=0.5188 inference=27.73ms FPS=36.07 temp=67.2
+
+Saved: /home/bufo/traffic-sign-edge-ai/results/pi_benchmark_full_seed1_fp32_img320_20261124_223801.json
+Saved: /home/bufo/traffic-sign-edge-ai/results/pi_benchmark_full_seed1_fp32_img320_20261124_223801.csv
+frequency(0)=2400020480
+temp=66.4'C
+throttled=0x0
+===== 320px | SEED 1 | int8 =====
+frequency(0)=2400033792
+temp=64.8'C
+throttled=0x0
+[0;93m2026-11-24 22:38:01.291848016 [W:onnxruntime:Default, device_discovery.cc:164 DiscoverDevicesForPlatform] GPU device discovery failed: device_discovery.cc:89 ReadFileContents Failed to open file: "/sys/class/drm/card1/device/vendor"[m
+Raspberry Pi benchmark; imgsz=320 images=227 threads=4 repeat=5 warmup=5
+NOTE: multi-label class-aware NMS, confidence-first matching, COCO 101-point AP; exact Ultralytics parity is not claimed
+
+START seed=1 int8 imgsz=320
+  Model: yolo26n_img320_seed1_int8.onnx; imgsz=320; input=[1, 3, 320, 320]; output=[1, 7, 2100]
+    repeat 1/5: 50/227 images
+    repeat 1/5: 100/227 images
+    repeat 1/5: 150/227 images
+    repeat 1/5: 200/227 images
+    repeat 2/5: 50/227 images
+    repeat 2/5: 100/227 images
+    repeat 2/5: 150/227 images
+    repeat 2/5: 200/227 images
+    repeat 3/5: 50/227 images
+    repeat 3/5: 100/227 images
+    repeat 3/5: 150/227 images
+    repeat 3/5: 200/227 images
+    repeat 4/5: 50/227 images
+    repeat 4/5: 100/227 images
+    repeat 4/5: 150/227 images
+    repeat 4/5: 200/227 images
+    repeat 5/5: 50/227 images
+    repeat 5/5: 100/227 images
+    repeat 5/5: 150/227 images
+    repeat 5/5: 200/227 images
+  mAP50=0.7428 mAP50-95=0.5038 inference=29.67ms FPS=33.70 temp=65.0
+
+Saved: /home/bufo/traffic-sign-edge-ai/results/pi_benchmark_full_seed1_int8_img320_20261124_223853.json
+Saved: /home/bufo/traffic-sign-edge-ai/results/pi_benchmark_full_seed1_int8_img320_20261124_223853.csv
+frequency(0)=2400020480
+temp=63.7'C
+throttled=0x0
+===== 320px | SEED 1 | int8 =====
+frequency(0)=2400037120
+temp=63.7'C
+throttled=0x0
+[0;93m2026-11-24 22:38:53.396616000 [W:onnxruntime:Default, device_discovery.cc:164 DiscoverDevicesForPlatform] GPU device discovery failed: device_discovery.cc:89 ReadFileContents Failed to open file: "/sys/class/drm/card1/device/vendor"[m
+Raspberry Pi benchmark; imgsz=320 images=227 threads=4 repeat=5 warmup=5
+NOTE: multi-label class-aware NMS, confidence-first matching, COCO 101-point AP; exact Ultralytics parity is not claimed
+
+START seed=1 int8 imgsz=320
+  Model: yolo26n_img320_seed1_int8.onnx; imgsz=320; input=[1, 3, 320, 320]; output=[1, 7, 2100]
+    repeat 1/5: 50/227 images
+    repeat 1/5: 100/227 images
+    repeat 1/5: 150/227 images
+    repeat 1/5: 200/227 images
+    repeat 2/5: 50/227 images
+    repeat 2/5: 100/227 images
+    repeat 2/5: 150/227 images
+    repeat 2/5: 200/227 images
+    repeat 3/5: 50/227 images
+    repeat 3/5: 100/227 images
+    repeat 3/5: 150/227 images
+    repeat 3/5: 200/227 images
+    repeat 4/5: 50/227 images
+    repeat 4/5: 100/227 images
+    repeat 4/5: 150/227 images
+    repeat 4/5: 200/227 images
+    repeat 5/5: 50/227 images
+    repeat 5/5: 100/227 images
+    repeat 5/5: 150/227 images
+    repeat 5/5: 200/227 images
+  mAP50=0.7428 mAP50-95=0.5038 inference=29.68ms FPS=33.70 temp=64.45
+
+Saved: /home/bufo/traffic-sign-edge-ai/results/pi_benchmark_full_seed1_int8_img320_20261124_223945.json
+Saved: /home/bufo/traffic-sign-edge-ai/results/pi_benchmark_full_seed1_int8_img320_20261124_223945.csv
+frequency(0)=2400037120
+temp=63.7'C
+throttled=0x0
+===== 320px | SEED 1 | fp32 =====
+frequency(0)=2400027136
+temp=63.1'C
+throttled=0x0
+[0;93m2026-11-24 22:39:45.562154614 [W:onnxruntime:Default, device_discovery.cc:164 DiscoverDevicesForPlatform] GPU device discovery failed: device_discovery.cc:89 ReadFileContents Failed to open file: "/sys/class/drm/card1/device/vendor"[m
+Raspberry Pi benchmark; imgsz=320 images=227 threads=4 repeat=5 warmup=5
+NOTE: multi-label class-aware NMS, confidence-first matching, COCO 101-point AP; exact Ultralytics parity is not claimed
+
+START seed=1 fp32 imgsz=320
+  Model: yolo26n_img320_seed1_fp32.onnx; imgsz=320; input=[1, 3, 320, 320]; output=[1, 7, 2100]
+    repeat 1/5: 50/227 images
+    repeat 1/5: 100/227 images
+    repeat 1/5: 150/227 images
+    repeat 1/5: 200/227 images
+    repeat 2/5: 50/227 images
+    repeat 2/5: 100/227 images
+    repeat 2/5: 150/227 images
+    repeat 2/5: 200/227 images
+    repeat 3/5: 50/227 images
+    repeat 3/5: 100/227 images
+    repeat 3/5: 150/227 images
+    repeat 3/5: 200/227 images
+    repeat 4/5: 50/227 images
+    repeat 4/5: 100/227 images
+    repeat 4/5: 150/227 images
+    repeat 4/5: 200/227 images
+    repeat 5/5: 50/227 images
+    repeat 5/5: 100/227 images
+    repeat 5/5: 150/227 images
+    repeat 5/5: 200/227 images
+  mAP50=0.7472 mAP50-95=0.5188 inference=27.67ms FPS=36.15 temp=66.1
+
+Saved: /home/bufo/traffic-sign-edge-ai/results/pi_benchmark_full_seed1_fp32_img320_20261124_224034.json
+Saved: /home/bufo/traffic-sign-edge-ai/results/pi_benchmark_full_seed1_fp32_img320_20261124_224034.csv
+frequency(0)=2400030464
+temp=65.3'C
+throttled=0x0
+===== 320px | SEED 2 | fp32 =====
+frequency(0)=2400037120
+temp=65.3'C
+throttled=0x0
+[0;93m2026-11-24 22:40:34.730344909 [W:onnxruntime:Default, device_discovery.cc:164 DiscoverDevicesForPlatform] GPU device discovery failed: device_discovery.cc:89 ReadFileContents Failed to open file: "/sys/class/drm/card1/device/vendor"[m
+Raspberry Pi benchmark; imgsz=320 images=227 threads=4 repeat=5 warmup=5
+NOTE: multi-label class-aware NMS, confidence-first matching, COCO 101-point AP; exact Ultralytics parity is not claimed
+
+START seed=2 fp32 imgsz=320
+  Model: yolo26n_img320_seed2_fp32.onnx; imgsz=320; input=[1, 3, 320, 320]; output=[1, 7, 2100]
+    repeat 1/5: 50/227 images
+    repeat 1/5: 100/227 images
+    repeat 1/5: 150/227 images
+    repeat 1/5: 200/227 images
+    repeat 2/5: 50/227 images
+    repeat 2/5: 100/227 images
+    repeat 2/5: 150/227 images
+    repeat 2/5: 200/227 images
+    repeat 3/5: 50/227 images
+    repeat 3/5: 100/227 images
+    repeat 3/5: 150/227 images
+    repeat 3/5: 200/227 images
+    repeat 4/5: 50/227 images
+    repeat 4/5: 100/227 images
+    repeat 4/5: 150/227 images
+    repeat 4/5: 200/227 images
+    repeat 5/5: 50/227 images
+    repeat 5/5: 100/227 images
+    repeat 5/5: 150/227 images
+    repeat 5/5: 200/227 images
+  mAP50=0.7592 mAP50-95=0.5086 inference=27.70ms FPS=36.10 temp=66.1
+
+Saved: /home/bufo/traffic-sign-edge-ai/results/pi_benchmark_full_seed2_fp32_img320_20261124_224123.json
+Saved: /home/bufo/traffic-sign-edge-ai/results/pi_benchmark_full_seed2_fp32_img320_20261124_224123.csv
+frequency(0)=2400037120
+temp=65.9'C
+throttled=0x0
+===== 320px | SEED 2 | int8 =====
+frequency(0)=2400037120
+temp=65.9'C
+throttled=0x0
+[0;93m2026-11-24 22:41:23.980506074 [W:onnxruntime:Default, device_discovery.cc:164 DiscoverDevicesForPlatform] GPU device discovery failed: device_discovery.cc:89 ReadFileContents Failed to open file: "/sys/class/drm/card1/device/vendor"[m
+Raspberry Pi benchmark; imgsz=320 images=227 threads=4 repeat=5 warmup=5
+NOTE: multi-label class-aware NMS, confidence-first matching, COCO 101-point AP; exact Ultralytics parity is not claimed
+
+START seed=2 int8 imgsz=320
+  Model: yolo26n_img320_seed2_int8.onnx; imgsz=320; input=[1, 3, 320, 320]; output=[1, 7, 2100]
+    repeat 1/5: 50/227 images
+    repeat 1/5: 100/227 images
+    repeat 1/5: 150/227 images
+    repeat 1/5: 200/227 images
+    repeat 2/5: 50/227 images
+    repeat 2/5: 100/227 images
+    repeat 2/5: 150/227 images
+    repeat 2/5: 200/227 images
+    repeat 3/5: 50/227 images
+    repeat 3/5: 100/227 images
+    repeat 3/5: 150/227 images
+    repeat 3/5: 200/227 images
+    repeat 4/5: 50/227 images
+    repeat 4/5: 100/227 images
+    repeat 4/5: 150/227 images
+    repeat 4/5: 200/227 images
+    repeat 5/5: 50/227 images
+    repeat 5/5: 100/227 images
+    repeat 5/5: 150/227 images
+    repeat 5/5: 200/227 images
+  mAP50=0.7452 mAP50-95=0.4775 inference=29.80ms FPS=33.55 temp=65.0
+
+Saved: /home/bufo/traffic-sign-edge-ai/results/pi_benchmark_full_seed2_int8_img320_20261124_224216.json
+Saved: /home/bufo/traffic-sign-edge-ai/results/pi_benchmark_full_seed2_int8_img320_20261124_224216.csv
+frequency(0)=2400033792
+temp=63.7'C
+throttled=0x0
+===== 320px | SEED 2 | int8 =====
+frequency(0)=2400033792
+temp=63.1'C
+throttled=0x0
+[0;93m2026-11-24 22:42:16.248523143 [W:onnxruntime:Default, device_discovery.cc:164 DiscoverDevicesForPlatform] GPU device discovery failed: device_discovery.cc:89 ReadFileContents Failed to open file: "/sys/class/drm/card1/device/vendor"[m
+Raspberry Pi benchmark; imgsz=320 images=227 threads=4 repeat=5 warmup=5
+NOTE: multi-label class-aware NMS, confidence-first matching, COCO 101-point AP; exact Ultralytics parity is not claimed
+
+START seed=2 int8 imgsz=320
+  Model: yolo26n_img320_seed2_int8.onnx; imgsz=320; input=[1, 3, 320, 320]; output=[1, 7, 2100]
+    repeat 1/5: 50/227 images
+    repeat 1/5: 100/227 images
+    repeat 1/5: 150/227 images
+    repeat 1/5: 200/227 images
+    repeat 2/5: 50/227 images
+    repeat 2/5: 100/227 images
+    repeat 2/5: 150/227 images
+    repeat 2/5: 200/227 images
+    repeat 3/5: 50/227 images
+    repeat 3/5: 100/227 images
+    repeat 3/5: 150/227 images
+    repeat 3/5: 200/227 images
+    repeat 4/5: 50/227 images
+    repeat 4/5: 100/227 images
+    repeat 4/5: 150/227 images
+    repeat 4/5: 200/227 images
+    repeat 5/5: 50/227 images
+    repeat 5/5: 100/227 images
+    repeat 5/5: 150/227 images
+    repeat 5/5: 200/227 images
+  mAP50=0.7452 mAP50-95=0.4775 inference=29.63ms FPS=33.75 temp=65.0
+
+Saved: /home/bufo/traffic-sign-edge-ai/results/pi_benchmark_full_seed2_int8_img320_20261124_224308.json
+Saved: /home/bufo/traffic-sign-edge-ai/results/pi_benchmark_full_seed2_int8_img320_20261124_224308.csv
+frequency(0)=2400033792
+temp=63.7'C
+throttled=0x0
+===== 320px | SEED 2 | fp32 =====
+frequency(0)=2400020480
+temp=63.1'C
+throttled=0x0
+[0;93m2026-11-24 22:43:08.397927134 [W:onnxruntime:Default, device_discovery.cc:164 DiscoverDevicesForPlatform] GPU device discovery failed: device_discovery.cc:89 ReadFileContents Failed to open file: "/sys/class/drm/card1/device/vendor"[m
+Raspberry Pi benchmark; imgsz=320 images=227 threads=4 repeat=5 warmup=5
+NOTE: multi-label class-aware NMS, confidence-first matching, COCO 101-point AP; exact Ultralytics parity is not claimed
+
+START seed=2 fp32 imgsz=320
+  Model: yolo26n_img320_seed2_fp32.onnx; imgsz=320; input=[1, 3, 320, 320]; output=[1, 7, 2100]
+    repeat 1/5: 50/227 images
+    repeat 1/5: 100/227 images
+    repeat 1/5: 150/227 images
+    repeat 1/5: 200/227 images
+    repeat 2/5: 50/227 images
+    repeat 2/5: 100/227 images
+    repeat 2/5: 150/227 images
+    repeat 2/5: 200/227 images
+    repeat 3/5: 50/227 images
+    repeat 3/5: 100/227 images
+    repeat 3/5: 150/227 images
+    repeat 3/5: 200/227 images
+    repeat 4/5: 50/227 images
+    repeat 4/5: 100/227 images
+    repeat 4/5: 150/227 images
+    repeat 4/5: 200/227 images
+    repeat 5/5: 50/227 images
+    repeat 5/5: 100/227 images
+    repeat 5/5: 150/227 images
+    repeat 5/5: 200/227 images
+  mAP50=0.7592 mAP50-95=0.5086 inference=27.49ms FPS=36.37 temp=66.65
+
+Saved: /home/bufo/traffic-sign-edge-ai/results/pi_benchmark_full_seed2_fp32_img320_20261124_224357.json
+Saved: /home/bufo/traffic-sign-edge-ai/results/pi_benchmark_full_seed2_fp32_img320_20261124_224357.csv
+frequency(0)=2400033792
+temp=65.9'C
+throttled=0x0
+ondemand

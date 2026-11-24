@@ -1,0 +1,77 @@
+{
+  "metadata": {
+    "run_at": "20261124_224216",
+    "imgsz": 320,
+    "input_shape": [
+      1,
+      3,
+      320,
+      320
+    ],
+    "output_shape": [
+      1,
+      7,
+      2100
+    ],
+    "test_images": 227,
+    "warmup": 5,
+    "repeats": 5,
+    "threads": 4,
+    "selected_seed": 2,
+    "selected_variant": "int8",
+    "confidence_threshold": 0.001,
+    "max_det": 300,
+    "host": "Raspberry Pi 5 (expected, verify externally)",
+    "onnxruntime_version": "1.23.2",
+    "numpy_version": "2.2.6",
+    "opencv_version": "4.12.0",
+    "cpu_count": 4,
+    "ram_total_bytes": 8453963776,
+    "important": "Accuracy uses an independently implemented COCO-style AP and Ultralytics-compatible matching/NMS. Exact parity is not claimed; pipeline FPS excludes JPEG disk decode",
+    "matching": "confidence-first greedy per-IoU matching; compatible with Ultralytics 8.4.215 default validator",
+    "nms_multilabel": true,
+    "ap_interpolation": "COCO 101-point mean precision with precision envelope; no trapezoid sentinel"
+  },
+  "results": [
+    {
+      "model": "yolo26n_img320_seed2_int8.onnx",
+      "imgsz": 320,
+      "nms_iou": 0.7,
+      "model_bytes": 2882153,
+      "images": 227,
+      "repeats": 5,
+      "inference_mean_ms": 29.804996136563876,
+      "inference_median_ms": 29.795555,
+      "inference_p95_ms": 29.9415874,
+      "preprocess_mean_ms": 1.6046725251101321,
+      "postprocess_mean_ms": 0.6711926828193833,
+      "pipeline_mean_ms_no_decode": 32.08086134449339,
+      "inference_fps": 33.55142189645279,
+      "pipeline_fps_no_decode": 31.17123288124082,
+      "temp_start_c": 65.0,
+      "temp_end_c": 65.0,
+      "mAP50": 0.7451895775952289,
+      "mAP50_95": 0.4774609986889652,
+      "gt_boxes": 228,
+      "per_class": {
+        "prohibitory": {
+          "gt_boxes": 143,
+          "mAP50": 0.8032190961738939,
+          "mAP50_95": 0.5251280015049935
+        },
+        "danger": {
+          "gt_boxes": 61,
+          "mAP50": 0.7672716524636406,
+          "mAP50_95": 0.4975894578755935
+        },
+        "mandatory": {
+          "gt_boxes": 24,
+          "mAP50": 0.665077984148152,
+          "mAP50_95": 0.40966553668630856
+        }
+      },
+      "seed": 2,
+      "format": "int8"
+    }
+  ]
+}

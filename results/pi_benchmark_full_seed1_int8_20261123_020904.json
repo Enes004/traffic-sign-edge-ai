@@ -1,0 +1,64 @@
+{
+  "metadata": {
+    "run_at": "20261123_020904",
+    "test_images": 227,
+    "warmup": 5,
+    "repeats": 5,
+    "threads": 4,
+    "selected_seed": 1,
+    "selected_variant": "int8",
+    "confidence_threshold": 0.001,
+    "max_det": 300,
+    "host": "Raspberry Pi 5 (expected, verify externally)",
+    "onnxruntime_version": "1.23.2",
+    "numpy_version": "2.2.6",
+    "opencv_version": "4.12.0",
+    "cpu_count": 4,
+    "ram_total_bytes": 8453963776,
+    "important": "Accuracy uses an independently implemented COCO-style AP and Ultralytics-compatible matching/NMS. Exact parity is not claimed; pipeline FPS excludes JPEG disk decode",
+    "matching": "confidence-first greedy per-IoU matching; compatible with Ultralytics 8.4.215 default validator",
+    "nms_multilabel": true,
+    "ap_interpolation": "COCO 101-point mean precision with precision envelope; no trapezoid sentinel"
+  },
+  "results": [
+    {
+      "model": "yolo26n_img640_seed1_int8.onnx",
+      "nms_iou": 0.7,
+      "model_bytes": 3008223,
+      "images": 227,
+      "repeats": 5,
+      "inference_mean_ms": 128.99364274008812,
+      "inference_median_ms": 128.963456,
+      "inference_p95_ms": 129.5846284,
+      "preprocess_mean_ms": 6.2914177392070485,
+      "postprocess_mean_ms": 0.5607109806167401,
+      "pipeline_mean_ms_no_decode": 135.8457714599119,
+      "inference_fps": 7.752320027235141,
+      "pipeline_fps_no_decode": 7.361289124079215,
+      "temp_start_c": 64.45,
+      "temp_end_c": 64.45,
+      "mAP50": 0.9638667767907739,
+      "mAP50_95": 0.7931399073794606,
+      "gt_boxes": 228,
+      "per_class": {
+        "prohibitory": {
+          "gt_boxes": 143,
+          "mAP50": 0.9897280904813656,
+          "mAP50_95": 0.8224668668759495
+        },
+        "danger": {
+          "gt_boxes": 61,
+          "mAP50": 0.9659453138650207,
+          "mAP50_95": 0.7872175771127686
+        },
+        "mandatory": {
+          "gt_boxes": 24,
+          "mAP50": 0.935926926025936,
+          "mAP50_95": 0.7697352781496638
+        }
+      },
+      "seed": 1,
+      "format": "int8"
+    }
+  ]
+}

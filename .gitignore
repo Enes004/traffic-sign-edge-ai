@@ -226,3 +226,15 @@ data/
 runs/**/weights/
 runs/detect/
 
+
+# Preserve the two source logs for the final ABBA analysis.
+!/results/abba_3seed_20261123_014946.log
+!/results/abba_320_20261124_223345.log
+
+# Local reruns and generated weights. Published models are already tracked.
+/results/reproduction/
+/reports/
+/yolo26n.pt
+/models/*.pt
+/models/*.onnx
+/runs/train/yolo26n_img*_seed*_repro*/

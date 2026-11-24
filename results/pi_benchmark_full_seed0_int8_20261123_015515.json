@@ -1,0 +1,64 @@
+{
+  "metadata": {
+    "run_at": "20261123_015515",
+    "test_images": 227,
+    "warmup": 5,
+    "repeats": 5,
+    "threads": 4,
+    "selected_seed": 0,
+    "selected_variant": "int8",
+    "confidence_threshold": 0.001,
+    "max_det": 300,
+    "host": "Raspberry Pi 5 (expected, verify externally)",
+    "onnxruntime_version": "1.23.2",
+    "numpy_version": "2.2.6",
+    "opencv_version": "4.12.0",
+    "cpu_count": 4,
+    "ram_total_bytes": 8453963776,
+    "important": "Accuracy uses an independently implemented COCO-style AP and Ultralytics-compatible matching/NMS. Exact parity is not claimed; pipeline FPS excludes JPEG disk decode",
+    "matching": "confidence-first greedy per-IoU matching; compatible with Ultralytics 8.4.215 default validator",
+    "nms_multilabel": true,
+    "ap_interpolation": "COCO 101-point mean precision with precision envelope; no trapezoid sentinel"
+  },
+  "results": [
+    {
+      "model": "yolo26n_img640_seed0_int8.onnx",
+      "nms_iou": 0.7,
+      "model_bytes": 3008225,
+      "images": 227,
+      "repeats": 5,
+      "inference_mean_ms": 128.25884125814977,
+      "inference_median_ms": 128.251858,
+      "inference_p95_ms": 128.8558817,
+      "preprocess_mean_ms": 6.2908737030837,
+      "postprocess_mean_ms": 0.8293855004405286,
+      "pipeline_mean_ms_no_decode": 135.379100461674,
+      "inference_fps": 7.796733466407006,
+      "pipeline_fps_no_decode": 7.386664533814813,
+      "temp_start_c": 65.55,
+      "temp_end_c": 63.9,
+      "mAP50": 0.9499857267283818,
+      "mAP50_95": 0.7547465622645626,
+      "gt_boxes": 228,
+      "per_class": {
+        "prohibitory": {
+          "gt_boxes": 143,
+          "mAP50": 0.9914463354058374,
+          "mAP50_95": 0.8220908178057252
+        },
+        "danger": {
+          "gt_boxes": 61,
+          "mAP50": 0.9648417589011649,
+          "mAP50_95": 0.7703950907760065
+        },
+        "mandatory": {
+          "gt_boxes": 24,
+          "mAP50": 0.893669085878143,
+          "mAP50_95": 0.6717537782119563
+        }
+      },
+      "seed": 0,
+      "format": "int8"
+    }
+  ]
+}

@@ -3,7 +3,8 @@
 
 Requires: numpy, opencv-python-headless, onnxruntime, psutil.
 No PyTorch/Ultralytics installation needed on Raspberry Pi.
-Model output: (1, 7, 8400) = xywh + 3 class scores (raw one-to-many head).
+Model output: (1, 7, N) = xywh + 3 class scores (raw one-to-many head).
+N is 2100 for 320x320 input and 8400 for 640x640 input.
 Raw output requires class-aware Non-Maximum Suppression (NMS).
 
 Metrics: COCO-style mAP50 and mAP50-95 (101-point interpolated AP).
@@ -23,6 +24,7 @@ import json
 import math
 import statistics
 import time
+from collections.abc import Sequence
 from datetime import datetime
 from pathlib import Path
 
@@ -33,6 +35,45 @@ import psutil
 
 CLASS_NAMES = ("prohibitory", "danger", "mandatory")
 IOU_THRESHOLDS = np.linspace(0.5, 0.95, 10)
+SUPPORTED_IMG_SIZES = (320, 640)
+
+
+def expected_anchors(imgsz: int) -> int:
+    """Return P3/8 + P4/16 + P5/32 detection anchors for a square input."""
+    if imgsz <= 0 or imgsz % 32:
+        raise ValueError(f"imgsz must be a positive multiple of 32, got {imgsz!r}")
+    return (imgsz // 8) ** 2 + (imgsz // 16) ** 2 + (imgsz // 32) ** 2
+
+
+def expected_output_shape(imgsz: int) -> tuple[int, int, int]:
+    """Return the raw one-to-many output shape for a given input resolution."""
+    return 1, 4 + len(CLASS_NAMES), expected_anchors(imgsz)
+
+
+def validate_output_shape(shape: Sequence[object], imgsz: int) -> None:
+    """Reject output tensors that do not match the selected resolution."""
+    expected = list(expected_output_shape(imgsz))
+    if list(shape) != expected:
+        raise ValueError(
+            f"Unexpected output shape {list(shape)}; expected {expected} for {imgsz}px"
+        )
+
+
+def validate_onnx_shapes(
+    input_shape: Sequence[object], output_shape: Sequence[object], imgsz: int
+) -> None:
+    """Validate static ONNX input/output metadata for the selected resolution."""
+    expected_input = [1, 3, imgsz, imgsz]
+    if list(input_shape) != expected_input:
+        raise ValueError(
+            f"Unexpected model input shape {list(input_shape)}; expected {expected_input}"
+        )
+    validate_output_shape(output_shape, imgsz)
+
+
+def model_filename(imgsz: int, seed: int, variant: str) -> str:
+    """Return the resolution-specific ONNX model filename."""
+    return f"yolo26n_img{imgsz}_seed{seed}_{variant}.onnx"
 
 
 def preprocess(image: np.ndarray, input_size: int = 640) -> tuple[np.ndarray, tuple]:
@@ -58,7 +99,8 @@ def class_aware_nms(
 ) -> np.ndarray:
     """Greedy NMS separately per class, then global top-score max_det.
 
-    This is needed for our exported YOLO26 (1, 7, 8400) one-to-many output.
+    This is needed for our exported YOLO26 (1, 7, N) one-to-many output,
+    where N is 2100 at 320 px and 8400 at 640 px.
     The NMS-free YOLO26 export is instead (1, max_det, 6).
     """
     kept: list[int] = []
@@ -85,10 +127,12 @@ def decode_prediction(
     output: np.ndarray, geometry: tuple, conf_threshold: float = 0.001,
     max_det: int = 300, nms_iou: float = 0.7,
 ) -> np.ndarray:
-    """Decode YOLO26 raw (1, 7, 8400) to N x 6: x1,y1,x2,y2,score,class.
+    """Decode YOLO26 raw (1, 7, N) to N x 6: x1,y1,x2,y2,score,class.
 
-    Use Ultralytics validation multi-label selection and per-class NMS on
-    one-to-many head. The first four output channels are xywh in input pixels.
+    N is 2100 at 320 px and 8400 at 640 px. Use Ultralytics validation
+    multi-label selection and per-class NMS on the one-to-many head. The first
+    four output channels are xywh in input pixels and are mapped back through
+    the letterbox geometry for the selected resolution.
     """
     if output.ndim != 3 or output.shape[0] != 1 or output.shape[1] != 7:
         raise ValueError(f"Unexpected output shape {output.shape}; expected [1,7,N]")
@@ -103,7 +147,7 @@ def decode_prediction(
     if chosen_anchors.size == 0:
         return np.empty((0, 6), dtype=np.float32)
 
-    # Perform class-aware NMS in 640x640 model coordinates, as Ultralytics does.
+    # Perform class-aware NMS in model input coordinates, as Ultralytics does.
     cx, cy, bw, bh = pred[:4, chosen_anchors]
     model_boxes = np.column_stack((cx - bw / 2, cy - bh / 2,
                                    cx + bw / 2, cy + bh / 2)).astype(np.float32)
@@ -266,7 +310,8 @@ def temperature_c() -> float | None:
 
 def benchmark_model(model_path: Path, images: list[Path], label_dir: Path,
                     repeat_count: int, warmup: int, threads: int,
-                    conf: float, max_det: int, nms_iou: float) -> dict:
+                    conf: float, max_det: int, nms_iou: float,
+                    imgsz: int = 640) -> dict:
     """Time CPU inference; evaluate one pass; repeat passes for latency statistics."""
     options = ort.SessionOptions()
     options.intra_op_num_threads = threads
@@ -279,31 +324,32 @@ def benchmark_model(model_path: Path, images: list[Path], label_dir: Path,
         raise RuntimeError("CPUExecutionProvider is not active")
     input_meta = session.get_inputs()[0]
     output_meta = session.get_outputs()[0]
-    if input_meta.shape != [1, 3, 640, 640]:
-        raise ValueError(f"Unexpected model input shape: {input_meta.shape}")
+    validate_onnx_shapes(input_meta.shape, output_meta.shape, imgsz)
     first = cv2.imread(str(images[0]))
     if first is None:
         raise FileNotFoundError(f"Cannot read {images[0]}")
-    first_tensor, _ = preprocess(first)
+    first_tensor, _ = preprocess(first, input_size=imgsz)
     for _ in range(warmup):
         session.run(None, {input_meta.name: first_tensor})
     timings_ms: list[float] = []
     stage_timings: dict[str, list[float]] = {"preprocess": [], "postprocess": []}
     samples: list[tuple[np.ndarray, np.ndarray]] = []
     start_temp = temperature_c()
-    print(f"  Model: {model_path.name}; input={input_meta.shape}; output={output_meta.shape}", flush=True)
+    print(f"  Model: {model_path.name}; imgsz={imgsz}; input={input_meta.shape}; "
+          f"output={output_meta.shape}", flush=True)
     for rep in range(repeat_count):
         for idx, image_path in enumerate(images):
             image = cv2.imread(str(image_path))
             if image is None:
                 raise FileNotFoundError(f"Cannot read {image_path}")
             start = time.perf_counter_ns()
-            tensor, geometry = preprocess(image)
+            tensor, geometry = preprocess(image, input_size=imgsz)
             pre_end = time.perf_counter_ns()
             output = session.run(None, {input_meta.name: tensor})[0]
             inf_end = time.perf_counter_ns()
             pred = decode_prediction(output, geometry, conf, max_det, nms_iou)
             end = time.perf_counter_ns()
+            validate_output_shape(output.shape, imgsz)
             stage_timings["preprocess"].append((pre_end - start) / 1e6)
             timings_ms.append((inf_end - pre_end) / 1e6)
             stage_timings["postprocess"].append((end - inf_end) / 1e6)
@@ -319,6 +365,7 @@ def benchmark_model(model_path: Path, images: list[Path], label_dir: Path,
     total_ms = statistics.mean(stage_timings["preprocess"]) + mean_inf + statistics.mean(stage_timings["postprocess"])
     return {
         "model": model_path.name,
+        "imgsz": imgsz,
         "nms_iou": nms_iou,
         "model_bytes": model_path.stat().st_size,
         "images": len(images),
@@ -340,6 +387,8 @@ def benchmark_model(model_path: Path, images: list[Path], label_dir: Path,
 def main() -> None:
     parser = argparse.ArgumentParser(description="Raspberry Pi 5 YOLO26n ONNX FP32-vs-INT8 benchmark")
     parser.add_argument("--root", type=Path, default=Path.home() / "traffic-sign-edge-ai")
+    parser.add_argument("--imgsz", type=int, choices=SUPPORTED_IMG_SIZES, default=640,
+                        help="Model input resolution (320 or 640; default 640)")
     parser.add_argument("--seed", type=int, choices=(0, 1, 2), default=None,
                         help="Evaluate only one seed for parity checking")
     parser.add_argument("--variant", choices=("fp32", "int8"), default=None,
@@ -350,7 +399,7 @@ def main() -> None:
     parser.add_argument("--conf", type=float, default=0.001)
     parser.add_argument("--max-det", type=int, default=300)
     parser.add_argument("--nms-iou", type=float, default=0.7,
-                        help="Class-aware NMS IoU threshold for raw [1,7,8400] outputs")
+                        help="Class-aware NMS IoU threshold for raw [1,7,N] outputs")
     parser.add_argument("--max-images", type=int, default=None,
                         help="SMOKE TEST only. Results from subsets are not final mAP")
     args = parser.parse_args()
@@ -373,8 +422,8 @@ def main() -> None:
     if missing:
         raise FileNotFoundError(f"Missing corresponding YOLO label files, e.g. {missing[:5]}")
     cv2.setNumThreads(1)
-    print(f"Raspberry Pi benchmark; images={len(image_paths)} threads={args.threads} "
-          f"repeat={args.repeats} warmup={args.warmup}")
+    print(f"Raspberry Pi benchmark; imgsz={args.imgsz} images={len(image_paths)} "
+          f"threads={args.threads} repeat={args.repeats} warmup={args.warmup}")
     print("NOTE: multi-label class-aware NMS, confidence-first matching, COCO 101-point AP; exact Ultralytics parity is not claimed")
     results = []
     # Alternating FP32/INT8 order across seeds partially balances device heating.
@@ -382,12 +431,13 @@ def main() -> None:
     for seed in selected_seeds:
         variants = (args.variant,) if args.variant else (("fp32", "int8") if seed != 1 else ("int8", "fp32"))
         for variant in variants:
-            model = model_dir / f"yolo26n_img640_seed{seed}_{variant}.onnx"
+            model = model_dir / model_filename(args.imgsz, seed, variant)
             if not model.is_file():
                 raise FileNotFoundError(f"Missing model: {model}")
-            print(f"\nSTART seed={seed} {variant}", flush=True)
+            print(f"\nSTART seed={seed} {variant} imgsz={args.imgsz}", flush=True)
             row = benchmark_model(model, image_paths, label_dir, args.repeats,
-                                  args.warmup, args.threads, args.conf, args.max_det, args.nms_iou)
+                                  args.warmup, args.threads, args.conf, args.max_det,
+                                  args.nms_iou, args.imgsz)
             row["seed"] = seed
             row["format"] = variant
             results.append(row)
@@ -403,11 +453,14 @@ def main() -> None:
         prefix += f"_seed{args.seed}"
     if args.variant is not None:
         prefix += f"_{args.variant}"
-    json_path = output_dir / f"pi_benchmark_{prefix}_{stamp}.json"
-    csv_path = output_dir / f"pi_benchmark_{prefix}_{stamp}.csv"
+    json_path = output_dir / f"pi_benchmark_{prefix}_img{args.imgsz}_{stamp}.json"
+    csv_path = output_dir / f"pi_benchmark_{prefix}_img{args.imgsz}_{stamp}.csv"
     payload = {
         "metadata": {
             "run_at": stamp,
+            "imgsz": args.imgsz,
+            "input_shape": [1, 3, args.imgsz, args.imgsz],
+            "output_shape": list(expected_output_shape(args.imgsz)),
             "test_images": len(image_paths),
             "warmup": args.warmup,
             "repeats": args.repeats,
@@ -430,7 +483,7 @@ def main() -> None:
         "results": results,
     }
     json_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n")
-    columns = ("seed", "format", "model_bytes", "images", "repeats",
+    columns = ("seed", "format", "imgsz", "model_bytes", "images", "repeats",
                "mAP50", "mAP50_95", "inference_mean_ms", "inference_median_ms",
                "inference_p95_ms", "inference_fps", "preprocess_mean_ms",
                "postprocess_mean_ms", "pipeline_mean_ms_no_decode",
